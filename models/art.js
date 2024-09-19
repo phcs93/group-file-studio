@@ -43,7 +43,7 @@ function Art (bytes) {
         }
     }
 
-    // prevent any anything from being left behind
+    // prevent anything from being left behind
     this.remaining = bytes.slice(index);
 
 }
