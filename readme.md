@@ -1,28 +1,23 @@
-# Lookup File Editor
+# Group File Studio
 
-A tool for editing LOOKUP.DAT files from Build Engine games.
-
-You need to load up a PALETTE.DAT, LOOKUP.DAT and optionally an .ART file.
-
-Then you select a swap palette in the menu to edit.
-
-First you need to click on the palette color you want to use from the PALETTE.DAT color table (kinda like a brush).
-
-Then you can click on the index at the LOOKUP.DAT table you want to change to the color you selected.
-
-After you're done, click on the "EXPORT MODIFIED LOOKUP.DAT" to download your modified file.
+A tool for editing .GRP files from Build Engine games.
 
 You can access the app here:  
 https://phcs93.github.io/group-file-studio/
 
+# Features
+
+- you can load a .grp file and see all its contents
+- you can replace or edit the PALETTE.DAT and export the modified file
+- you can replace or edit the LOOKUP.DAT and export the modified file
+- you can replace or edit the the .ART files and export the modified files (not functional yet)
+
 # TO-DO
 
-- edit tile
-- reorder tile
-
-- tiles.cfg editor => HOLY FUCK
-
+- ability to replace a tile with some .PNG
+- ability to reorder tiles
+- ability to upload/edit/export a tiles.cfg (for Mapster32 tile groups)
 - make it look more like mapster
-
-- validate uploaded files
-- allow uploaded tiles to overlap?
+- validate uploaded files (for example, check if the GRP is a valid GRP)
+- allow uploaded .ART files to replace already loaded ones => store .ART file names?
+  - do all .ART files contain the same number of tiles?
