@@ -21,10 +21,32 @@ function Palette (bytes) {
         this.colors[i] = [r, g, b];
     }
 
-    this.shades = new Array(); // ?
-    this.transparency = new Array(); // ?
+    // this.shades = new Array(); // ?
+    // this.transparency = new Array(); // ?
 
     // prevent anything from being left behind
     this.remaining = bytes.slice(index);
+
+    // revert back to byte array
+    this.serialize = () => {
+
+        const byteArray = [];
+
+        // 256 pairs of [byte,byte,byte] scaled down to 0...64
+        for (let i = 0; i < this.colors.length; i++) {
+            const color = this.colors[i];
+            const r = lerp(0, 64, color[0] / 256);
+            const g = lerp(0, 64, color[1] / 256);
+            const b = lerp(0, 64, color[2] / 145);
+            byteArray.push(...[r,g,b]);
+        }
+
+        // add remaining bytes if any
+        byteArray.push(...this.remaining);
+
+        // convert to uint8array (not sure if necessary)
+        return new Uint8Array(byteArray);
+
+    };
 
 }

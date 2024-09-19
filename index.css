@@ -207,11 +207,10 @@ button:hover {
 }
 
 svg {
-    border: 1px dashed lightgray;
-    width: calc(100% - 64px);
-    &#palette-svg { height: 256px; }
-    &#lookup-svg { height: 512px; }
-    &#tiles-svg { height: 512px; }
+    border: 1px solid lightgray;
+    box-sizing: border-box;
+    width: 256px;
+    height: 256px;
 }
 
 div#menu {
@@ -221,6 +220,24 @@ div#menu {
     position: fixed;
     top: 16px;
     left: 16px;
+    height: calc(100vh - 32px);    
+    overflow-x: hidden;
+    overflow-y: scroll;    
+    &::-webkit-scrollbar {            
+        background-color: transparent;
+        height: 4px;
+        width: 4px;
+    }    
+    &::-webkit-scrollbar-track {
+        background-color: transparent;    
+    }    
+    &::-webkit-scrollbar-thumb {
+        background-color: transparent;
+        border-radius: 10px;
+    }   
+    &:hover::-webkit-scrollbar-thumb {
+        background-color: #434343;
+    }
 }
 
 div.grid {
@@ -243,7 +260,7 @@ canvas {
     object-fit: contain;
     image-rendering: pixelated;
     &:hover {
-        cursor: pointer;
+        cursor: grab;
         border: 1px solid white;
     }
 }

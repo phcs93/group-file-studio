@@ -1,14 +1,17 @@
+<!DOCTYPE html>
+
 <html>
 
     <head>
 
-        <title>Lookup File Editor</title>
+        <title>Group File Studio</title>
 
         <!-- metas -->
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">    
 
+        <script type="application/javascript" src="models/grp.js"></script>
         <script type="application/javascript" src="models/palette.js"></script>
         <script type="application/javascript" src="models/lookup.js"></script>
         <script type="application/javascript" src="models/art.js"></script>
@@ -22,29 +25,41 @@
     <body>
 
         <div id="menu" class="flex-rows padding-16" style="width: calc(256px + 32px);">
+
+            <label>GRP <span style="color: gray; font-weight: normal;">(this will load all other files)</span></label>
+            <input type="file" id="grp-input" accept=".grp">
+            <br>
+
+            <br>
+            <hr>
+            <br>
                 
-            <label>PALETTE</label>
+            <label>PALETTE <span style="color: gray; font-weight: normal;">(overwrite the default file)</span></label>
             <input type="file" id="palette-input" accept=".dat">
             <br>
-            <svg id="palette-svg" style="width: 256px; height: 256px; border: 1px dashed lightgray;"></svg>
+            <svg id="palette-svg"></svg>
+            <br>
+            <button onclick="exportPaletteFile()">EXPORT MODIFIED PALETTE.DAT</button>
 
             <br>
             <hr>
             <br>
 
-            <label>LOOKUP</label>
+            <label>LOOKUP <span style="color: gray; font-weight: normal;">(overwrite the default file)</span></label>
             <input type="file" id="lookup-input" accept=".dat">
             <br>
             <label>PALETTE NUMBER</label>
             <select id="swap-select"></select>
             <br>
-            <svg id="lookup-svg" style="width: 256px; height: 256px; border: 1px dashed lightgray;"></svg>
+            <svg id="lookup-svg"></svg>
+            <br>
+            <button onclick="exportLookupFile()">EXPORT MODIFIED LOOKUP.DAT</button>
 
             <br>
             <hr>
             <br>
 
-            <label>ART <spna style="color: gray; font-weight: normal;">(you can select multiple files)</spna></label>
+            <label>ART <span style="color: gray; font-weight: normal;">(you can select multiple files)</span></label>
             <input type="file" id="art-input" accept=".art" multiple="true">
             
             <br>
@@ -53,12 +68,6 @@
 
             <label id="grid-size-label" data-gridsize="64">GRID SIZE</label>
             <input type="range" id="grid-size-range" min="8" max="512" step="2" value="64">
-
-            <br>
-            <hr>
-            <br>
-
-            <button onclick="exportLookupFile()">EXPORT MODIFIED LOOKUP.DAT</button>
 
             <br>
             <hr>

@@ -13,4 +13,16 @@ Then you can click on the index at the LOOKUP.DAT table you want to change to th
 After you're done, click on the "EXPORT MODIFIED LOOKUP.DAT" to download your modified file.
 
 You can access the app here:  
-https://phcs93.github.io/lookup-file-editor/
+https://phcs93.github.io/group-file-studio/
+
+# TO-DO
+
+- edit tile
+- reorder tile
+
+- tiles.cfg editor => HOLY FUCK
+
+- make it look more like mapster
+
+- validate uploaded files
+- allow uploaded tiles to overlap?
