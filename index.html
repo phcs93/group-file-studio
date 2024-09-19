@@ -1,0 +1,77 @@
+<html>
+
+    <head>
+
+        <title>Lookup File Editor</title>
+
+        <!-- metas -->
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">    
+
+        <script type="application/javascript" src="models/palette.js"></script>
+        <script type="application/javascript" src="models/lookup.js"></script>
+        <script type="application/javascript" src="models/art.js"></script>
+
+        <!-- index -->
+        <link rel="stylesheet" href="index.css">
+        <script type="application/javascript" src="index.js"></script>
+
+    </head>
+
+    <body>
+
+        <div id="menu" class="flex-rows padding-16" style="width: calc(256px + 32px);">
+                
+            <label>PALETTE</label>
+            <input type="file" id="palette-input" accept=".dat">
+            <br>
+            <svg id="palette-svg" style="width: 256px; height: 256px; border: 1px dashed lightgray;"></svg>
+
+            <br>
+            <hr>
+            <br>
+
+            <label>LOOKUP</label>
+            <input type="file" id="lookup-input" accept=".dat">
+            <br>
+            <label>PALETTE NUMBER</label>
+            <select id="swap-select"></select>
+            <br>
+            <svg id="lookup-svg" style="width: 256px; height: 256px; border: 1px dashed lightgray;"></svg>
+
+            <br>
+            <hr>
+            <br>
+
+            <label>ART <spna style="color: gray; font-weight: normal;">(you can select multiple files)</spna></label>
+            <input type="file" id="art-input" accept=".art" multiple="true">
+            
+            <br>
+            <hr>
+            <br>
+
+            <label id="grid-size-label" data-gridsize="64">GRID SIZE</label>
+            <input type="range" id="grid-size-range" min="8" max="512" step="2" value="64">
+
+            <br>
+            <hr>
+            <br>
+
+            <button onclick="exportLookupFile()">EXPORT MODIFIED LOOKUP.DAT</button>
+
+            <br>
+            <hr>
+            <br>
+
+            <label>MADE BY <a href="https://github.com/phcs93/lookup-file-editor">PHCS93</a></label>
+
+        </div>
+
+        <div id="tiles" class="grid grow" style="background-color: black;">
+        
+        </div>
+
+    </body>
+
+</html>

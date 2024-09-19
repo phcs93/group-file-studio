@@ -1,0 +1,278 @@
+:root {
+    --grid-size: 64px;
+}
+
+* {
+    font-family: 'Segoe UI';
+    color: lightgray;
+    flex-shrink: 0; /* fuck css man */
+}
+
+body {
+    margin: 0px;
+    padding: 0px;
+    background-image: url(./bg.jpg);
+}
+
+div {
+    box-sizing: border-box;
+}
+
+div.flex-columns {
+    display: flex;
+    flex-direction: row;
+}
+
+div.flex-rows {
+    display: flex;
+    flex-direction: column;
+}
+
+div.gap-16 {
+    gap: 16px;
+}
+
+div.gap-8 {
+    gap: 8px;
+}
+
+div.justify-center {
+    justify-content: center;
+}
+
+div.align-center {
+    align-items: center;
+}
+
+div.wrap {
+    flex-wrap: wrap;
+}
+
+div.grow {
+    display: flex;
+    flex-grow: 1;
+    flex-basis: 0;
+}
+
+div.shrink {
+    flex-shrink: 1;
+}
+
+div.no-shrink {
+    flex-shrink: 0;
+}
+
+div.margin-16 {
+    margin: 16px;
+}
+
+div.margin-8 {
+    margin: 8px;
+}
+
+div.padding-16 {
+    padding: 16px;
+}
+
+div.padding-8 {
+    padding: 8px;
+}
+
+div.padding-x-16 {
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+div.padding-x-8 {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+div.center-text {
+    text-align: center;
+}
+
+div.self-center {
+    align-self: center;
+}
+
+div.self-start {
+    align-self: flex-start;
+}
+
+div.self-end {
+    align-self: flex-end;
+}
+
+div.items-start {
+    align-items: flex-start;
+}
+
+div.items-end {
+    align-items: flex-end;
+}
+
+div.space-between {
+    justify-content: space-between;
+}
+
+div.space-around {
+    justify-content: space-around;
+}
+
+div.space-evenly {
+    justify-content: space-evenly;
+}
+
+div.border-left {
+    border-left: 1px solid #2B2B2B;
+}
+
+div.border-right {
+    border-right: 1px solid #2B2B2B;
+}
+
+div.border-top {
+    border-top: 1px solid #2B2B2B;
+}
+
+div.border-bottom {
+    border-bottom: 1px solid #2B2B2B;
+}
+
+label {
+    font-family: "Candara";
+    font-size: 14px;
+    font-weight: bold;
+    height: 32px;
+    line-height: 32px;
+    color: lightgray;
+}
+
+hr {
+    width: 100%;
+    margin: 0px;
+    border: none;
+    border-bottom: 1px solid #2B2B2B;
+}
+
+select {
+    font-family: "Segoe UI";
+    font-size: 16px;
+    height: 32px;
+    padding-left: 8px;
+    padding-right: 8px;
+    color: lightgray;
+    background-color: #090909;
+    border-radius: 5px;
+    border: 1px solid #2B2B2B;
+}
+
+input[type="range"] { 
+    accent-color: white;
+}
+
+input[type="text"] {
+    font-family: "Segoe UI";
+    font-size: 16px;
+    height: 32px;
+    padding-left: 8px;
+    padding-right: 8px;
+    color: lightgray;
+    background-color: #090909;
+    border-radius: 5px;
+    border: 1px solid #2B2B2B;
+    flex-grow: 1;
+}
+
+input[type="text"]:focus {
+    border: 1px solid white;
+}
+
+button {
+    font-family: "Candara";
+    font-size: 14px;
+    font-weight: bold;
+    height: 36px;
+    padding-left: 8px;
+    padding-right: 8px;
+    color: white;
+    background-color: #090909;
+    border-radius: 5px;
+    border: 1px solid #2B2B2B;    
+}
+
+button:hover {
+    cursor: pointer;
+}
+
+svg {
+    border: 1px dashed lightgray;
+    width: calc(100% - 64px);
+    &#palette-svg { height: 256px; }
+    &#lookup-svg { height: 512px; }
+    &#tiles-svg { height: 512px; }
+}
+
+div#menu {
+    background-color: #101010;
+    box-shadow: 0px 0px 5px black;
+    border-radius: 10px;
+    position: fixed;
+    top: 16px;
+    left: 16px;
+}
+
+div.grid {
+    /* background-image: url(./bg.png); */
+    margin-top: 16px;
+    margin-left: calc(256px + 32px + 32px);
+    margin-right: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, var(--grid-size));
+    grid-template-rows: repeat(auto-fill, var(--grid-size));
+    grid-auto-rows: var(--grid-size);
+    grid-gap: 0px;
+}
+
+canvas {
+    border: 1px dashed #101010;
+    box-sizing: border-box;    
+    width: var(--grid-size);
+    height: var(--grid-size);
+    object-fit: contain;
+    image-rendering: pixelated;
+    &:hover {
+        cursor: pointer;
+        border: 1px solid white;
+    }
+}
+
+label#grid-size-label::after {
+    content: attr(data-gridsize) "px";
+    float: right;
+}
+
+svg {
+
+    & rect:hover,
+    & rect[data-selected="true"] {
+        stroke: white;
+        stroke-width: 2;
+        cursor: pointer;
+        animation: blink 0.5s ease-in-out infinite;
+    }
+
+}
+
+@keyframes blink {
+    0% {
+        stroke: #000000;
+    }
+    50% {
+        stroke: #FFFFFF;
+    }
+    100% {
+        stroke: #000000;
+    }
+}
