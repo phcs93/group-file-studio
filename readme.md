@@ -6,7 +6,7 @@ You need to load up a PALETTE.DAT, LOOKUP.DAT and optionally an .ART file.
 
 Then you select a swap palette in the menu to edit.
 
-First you need to click on the palette color you want to use from the PALETTE.DAT color table.
+First you need to click on the palette color you want to use from the PALETTE.DAT color table (kinda like a brush).
 
 Then you can click on the index at the LOOKUP.DAT table you want to change to the color you selected.
 
