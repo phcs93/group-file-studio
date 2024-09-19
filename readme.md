@@ -11,3 +11,6 @@ First you need to click on the palette color you want to use from the PALETTE.DA
 Then you can click on the index at the LOOKUP.DAT table you want to change to the color you selected.
 
 After you're done, click on the "EXPORT MODIFIED LOOKUP.DAT" to download your modified file.
+
+You can access the app here:  
+https://phcs93.github.io/lookup-file-editor/
