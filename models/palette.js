@@ -24,7 +24,7 @@ function Palette (bytes) {
     this.shades = new Array(); // ?
     this.transparency = new Array(); // ?
 
-    // prevent any anything from being left behind
+    // prevent anything from being left behind
     this.remaining = bytes.slice(index);
 
 }
