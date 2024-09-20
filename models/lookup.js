@@ -1,5 +1,8 @@
 function Lookup (bytes) {
 
+    // linear interpolation
+    const lerp = (a, b, v) => (1 - v) * a + v * b;
+
     let index = 0; 
 
     const b = (n) => bytes[index++] << n;
@@ -16,6 +19,17 @@ function Lookup (bytes) {
             table: new Array(256).fill(0).map(() => byte())
         };
     }
+
+    // TO-DO => only in duke nukem 3d
+    // this.alternates = new Array(6);
+
+    // for (let i = 0; i < this.alternates.length; i++) {        
+    //     this.alternates[i] = new Array(256).fill(0).map(() => [
+    //         lerp(0, 255, byte() / 64),
+    //         lerp(0, 255, byte() / 64),
+    //         lerp(0, 255, byte() / 64),
+    //     ]);
+    // }
 
     // prevent anything from being left behind
     this.remaining = bytes.slice(index);

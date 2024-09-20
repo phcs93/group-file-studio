@@ -2,7 +2,7 @@ Globals = {
     GRP: null,
     Pelette: null,
     Lookup: null,
-    Arts: [],
+    Arts: [],    
     SelectedPaletteColorIndex: null
 };
 
@@ -10,8 +10,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // change GRP
     document.querySelector("input#grp-input").onchange = e => {
+
         const reader = new FileReader();
+
         reader.onload = async () => {
+
             const bytes = new Uint8Array(reader.result);
             Globals.GRP = new GRP(bytes);
             console.log(Globals.GRP);
@@ -34,9 +37,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             render();
 
-
         };
+
         reader.readAsArrayBuffer(e.target.files[0]);
+        
     };
 
     // change palette
@@ -51,6 +55,12 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         reader.readAsArrayBuffer(e.target.files[0]);
     };
+
+    // change shade
+    document.querySelector("input#shade-range").oninput = e => {
+        document.querySelector("label#shade-label").dataset.shade = e.target.value;
+        render();
+    }
 
     // change lookup
     document.querySelector("input#lookup-input").onchange = e => {
@@ -84,12 +94,37 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // change grid size
-    document.querySelector("input#grid-size-range").oninput = async e => {
+    document.querySelector("input#grid-size-range").oninput = e => {
         document.querySelector("label#grid-size-label").dataset.gridsize = e.target.value;
         document.querySelector(":root").style.setProperty("--grid-size", `${e.target.value}px`);
     };
 
+    // change enable transparency
+    document.querySelector("input#enable-transparency").onchange = e => {
+        render();
+    };
+
+    // change enable background
+    document.querySelector("input#enable-background").onchange = e => {
+        document.querySelectorAll("div.grid").forEach(grid => grid.dataset.background = e.target.checked);
+    };
+
 });
+
+// render everything
+function render() {
+    const transparency = document.querySelector("input#enable-transparency").checked;
+    const shadeIndex = document.querySelector("input#shade-range").value;
+    const swapIndex = document.querySelector("select#swap-select").value || null;
+    renderPalette(Globals.Palette);
+    renderShade(Globals.Palette, shadeIndex);
+    renderShadeOptions(Globals.Palette);
+    renderLookup(Globals.Palette, Globals.Lookup, swapIndex);
+    renderSwapOptions(Globals.Lookup);
+    renderArts(Globals.Palette, shadeIndex, Globals.Lookup, swapIndex, Globals.Arts, transparency);
+    document.querySelector("input#shade-range").value = shadeIndex;
+    document.querySelector("select#swap-select").value = swapIndex || "";
+}
 
 // render palette
 function renderPalette(palette) {
@@ -110,6 +145,37 @@ function renderPalette(palette) {
                 data-selected="false" 
                 onclick="selectPaletteColorIndex(this, ${index})" 
                 ondblclick="editPaletteTable(${index})" 
+                x="${x * 16}" 
+                y="${y * 16}" 
+                width="16px" 
+                height="16px" 
+                fill="rgb(${color[0]},${color[1]},${color[2]})" 
+            />`;
+            elements.push(rect);
+        }
+    }
+
+    svg.insertAdjacentHTML("beforeend", elements.join(""));
+
+}
+
+// render shade
+function renderShade(palette, shadeIndex) {
+
+    const svg = document.querySelector("svg#shade-svg");
+
+    svg.innerHTML = "";
+
+    const elements = [];
+
+    const size = Math.sqrt(palette.colors.length);
+
+    for (let x = 0; x < size; x++) {
+        for (let y = 0; y < size; y++) {
+            const index = x + y * size;
+            const color = palette.colors[palette.shades[shadeIndex][index]];
+            const rect = `<rect 
+                onclick="editShadeTable(${shadeIndex}, ${index})" 
                 x="${x * 16}" 
                 y="${y * 16}" 
                 width="16px" 
@@ -156,6 +222,13 @@ function renderLookup(palette, lookup, swapIndex) {
 
 }
 
+// render shade options (range max)
+function renderShadeOptions(palette) {
+    if (palette) {
+        document.querySelector("input#shade-range").setAttribute("max", palette.shades.length - 1);
+    }
+}
+
 // render swap options
 function renderSwapOptions(lookup) {
     if (lookup) {
@@ -169,17 +242,21 @@ function renderSwapOptions(lookup) {
 }
 
 // render art
-function renderArts(palette, lookup, swapIndex, arts) {
+function renderArts(palette, shadeIndex, lookup, swapIndex, arts, transparency) {
 
     const grid = document.querySelector("div#tiles");
 
     grid.innerHTML = "";
 
-    palette = palette.colors;
+    let colors = palette.colors;
 
-    if (lookup && swapIndex !== null) {
-        palette = palette.map((c, i) => palette[lookup.swaps[swapIndex].table[i]]);
+    // apply swap if any selected
+    if (lookup && swapIndex !== null) {        
+        colors = colors.map((c, i) => colors[lookup.swaps[swapIndex].table[i]]);
     }
+
+    // apply shade
+    colors = colors.map((c, i) => colors[palette.shades[shadeIndex][i]]);
 
     for (let a = 0; a < arts.length; a++) {
 
@@ -198,29 +275,23 @@ function renderArts(palette, lookup, swapIndex, arts) {
                 canvas.dataset.height = tile[0].length;
 
                 canvas.setAttribute("title", `#${art.localtilestart + t} [${tile.length}x${tile[0].length}]`);
+                canvas.width = tile.length;
+                canvas.height = tile[0].length;
 
-                // 1d array for the canvas
-                const colors = [];
+                const context = canvas.getContext("2d");
+                const data = context.createImageData(tile.length, tile[0].length);
 
                 // iterate the Y axis first because the tiles are stored in the opposite coordinate system than the screen memory is stored
                 for (let y = 0; y < tile[0].length; y++) {
                     for (let x = 0; x < tile.length; x++) {
                         const index = tile[x][y];
-                        const color = palette[index];
-                        colors.push(color);
+                        const color = colors[index];
+                        const i = x + y * tile.length;
+                        data.data[i * 4 + 0] = color[0];
+                        data.data[i * 4 + 1] = color[1];
+                        data.data[i * 4 + 2] = color[2];
+                        data.data[i * 4 + 3] = transparency ? (index === 255 ? 0 : 255) : 255;
                     }
-                }
-
-                canvas.width = tile.length;
-                canvas.height = tile[0].length;
-                const context = canvas.getContext("2d");
-                const data = context.createImageData(tile.length, tile[0].length);
-
-                for (let i = 0; i < colors.length; i++) {
-                    data.data[i * 4 + 0] = colors[i][0];
-                    data.data[i * 4 + 1] = colors[i][1];
-                    data.data[i * 4 + 2] = colors[i][2];
-                    data.data[i * 4 + 3] = 255;
                 }
 
                 context.putImageData(data, 0, 0);
@@ -235,16 +306,6 @@ function renderArts(palette, lookup, swapIndex, arts) {
 
     }
 
-}
-
-// render everything
-function render() {
-    const swap = document.querySelector("select#swap-select").value || null;
-    renderPalette(Globals.Palette);
-    renderLookup(Globals.Palette, Globals.Lookup, swap);
-    renderSwapOptions(Globals.Lookup);
-    renderArts(Globals.Palette, Globals.Lookup, swap, Globals.Arts);
-    document.querySelector("select#swap-select").value = swap || "";
 }
 
 // select palette color
@@ -266,6 +327,14 @@ function editPaletteTable(colorIndex) {
         render();
     };
     colorPicker.click();
+}
+
+// edit shade table
+function editShadeTable(shadeIndex, colorIndex) {
+    if (Globals.SelectedPaletteColorIndex) {
+        Globals.Palette.shades[shadeIndex][colorIndex] = Globals.SelectedPaletteColorIndex;
+        render();
+    }
 }
 
 // edit lookup table

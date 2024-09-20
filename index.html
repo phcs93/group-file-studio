@@ -33,11 +33,35 @@
             <br>
             <hr>
             <br>
+
+            <label id="grid-size-label" data-gridsize="64">GRID SIZE</label>
+            <input type="range" id="grid-size-range" min="8" max="512" step="2" value="64">
+
+            <br>
+            
+            <div>
+                <input type="checkbox" id="enable-transparency" checked>
+                <label>ENABLE TRANSPARENCY</label>
+            </div>
+
+            <div>
+                <input type="checkbox" id="enable-background">
+                <label>ENABLE BACKGROUND</label>
+            </div>
+
+            <br>
+            <hr>
+            <br>
                 
             <label>PALETTE <span style="color: gray; font-weight: normal;">(overwrite the default file)</span></label>
             <input type="file" id="palette-input" accept=".dat">
             <br>
             <svg id="palette-svg"></svg>
+            <br>
+            <label id="shade-label" data-shade="0">SHADE</label>
+            <input type="range" id="shade-range" min="0" max="0" step="1">
+            <br>
+            <svg id="shade-svg"></svg>
             <br>
             <button onclick="exportPaletteFile()">EXPORT MODIFIED PALETTE.DAT</button>
 
@@ -48,7 +72,7 @@
             <label>LOOKUP <span style="color: gray; font-weight: normal;">(overwrite the default file)</span></label>
             <input type="file" id="lookup-input" accept=".dat">
             <br>
-            <label>PALETTE NUMBER</label>
+            <label>PALETTE SWAP NUMBER</label>
             <select id="swap-select"></select>
             <br>
             <svg id="lookup-svg"></svg>
@@ -62,13 +86,6 @@
             <label>ART <span style="color: gray; font-weight: normal;">(you can select multiple files)</span></label>
             <input type="file" id="art-input" accept=".art" multiple="true">
             
-            <br>
-            <hr>
-            <br>
-
-            <label id="grid-size-label" data-gridsize="64">GRID SIZE</label>
-            <input type="range" id="grid-size-range" min="8" max="512" step="2" value="64">
-
             <br>
             <hr>
             <br>

@@ -21,8 +21,19 @@ function Palette (bytes) {
         this.colors[i] = [r, g, b];
     }
 
-    // this.shades = new Array(); // ?
-    // this.transparency = new Array(); // ?
+    this.shades = new Array(int16());
+
+    for (let i = 0; i < this.shades.length; i++) {
+        this.shades[i] = new Array(256).fill(0).map(() => byte());
+    }
+
+    // this.transparency = new Array(256).fill(new Array(256));
+
+    // for (let x = 0; x < this.transparency.length; x++) {
+    //     for (let y = 0; y < this.transparency[x].length; y++) {
+    //         this.transparency[x][y] = byte();
+    //     }
+    // }
 
     // prevent anything from being left behind
     this.remaining = bytes.slice(index);
@@ -35,10 +46,15 @@ function Palette (bytes) {
         // 256 pairs of [byte,byte,byte] scaled down to 0...64
         for (let i = 0; i < this.colors.length; i++) {
             const color = this.colors[i];
-            const r = lerp(0, 64, color[0] / 256);
-            const g = lerp(0, 64, color[1] / 256);
-            const b = lerp(0, 64, color[2] / 145);
+            const r = lerp(0, 64, color[0] / 255);
+            const g = lerp(0, 64, color[1] / 255);
+            const b = lerp(0, 64, color[2] / 255);
             byteArray.push(...[r,g,b]);
+        }
+
+        // arrays of 256 bytes
+        for (let i = 0; i < this.shades.length; i++) {
+            byteArray.push(...this.shades[i]);
         }
 
         // add remaining bytes if any

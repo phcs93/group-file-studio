@@ -14,6 +14,7 @@ https://phcs93.github.io/group-file-studio/
 
 # TO-DO
 
+- figure out the transparency table (alpha blending?)
 - ability to replace a tile with some .PNG
 - ability to reorder tiles
 - ability to upload/edit/export a tiles.cfg (for Mapster32 tile groups)
