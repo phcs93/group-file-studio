@@ -20,16 +20,28 @@ function Lookup (bytes) {
         };
     }
 
-    // TO-DO => only in duke nukem 3d
-    // this.alternates = new Array(6);
+    // only in duke nukem 3d?
+    this.alternates = new Array(6);
 
-    // for (let i = 0; i < this.alternates.length; i++) {        
-    //     this.alternates[i] = new Array(256).fill(0).map(() => [
-    //         lerp(0, 255, byte() / 64),
-    //         lerp(0, 255, byte() / 64),
-    //         lerp(0, 255, byte() / 64),
-    //     ]);
-    // }
+    for (let i = 0; i < this.alternates.length; i++) {        
+        this.alternates[i] = {
+            name: (() => {
+                switch (i) {
+                    case 0: return "underwater";
+                    case 1: return "night vision / underslime";
+                    case 2: return "3d realms logo";
+                    case 3: return "title screen";
+                    case 4: return "episode 1 ending";
+                    case 5: return "temporary slot for .anm files";
+                }
+            })(),
+            colors: new Array(256).fill(0).map(() => [
+                lerp(0, 255, byte() / 64),
+                lerp(0, 255, byte() / 64),
+                lerp(0, 255, byte() / 64),
+            ])
+        };    
+    }
 
     // prevent anything from being left behind
     this.remaining = bytes.slice(index);
@@ -46,6 +58,15 @@ function Lookup (bytes) {
         for (let i = 0; i < this.swaps.length; i++) {        
             byteArray.push(this.swaps[i].index);
             byteArray.push(...this.swaps[i].table);
+        }
+
+        // alternative palette tables => arrays of 256 [byte,byte,byte] byte arrays scaled down to 0...64
+        for (let i = 0; i < this.alternatives.length; i++) {
+            const color = this.alternatives[i].colors;
+            const r = lerp(0, 64, color[0] / 255);
+            const g = lerp(0, 64, color[1] / 255);
+            const b = lerp(0, 64, color[2] / 255);
+            byteArray.push(...[r,g,b]);
         }
 
         // add remaining bytes if any

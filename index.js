@@ -56,11 +56,15 @@ document.addEventListener("DOMContentLoaded", () => {
         reader.readAsArrayBuffer(e.target.files[0]);
     };
 
-    // change shade
+    // change shade (only label for better feedback)
     document.querySelector("input#shade-range").oninput = e => {
         document.querySelector("label#shade-label").dataset.shade = e.target.value;
+    };
+
+    // change shade (when user stops sliding)
+    document.querySelector("input#shade-range").onchange = e => {
         render();
-    }
+    };
 
     // change lookup
     document.querySelector("input#lookup-input").onchange = e => {
@@ -76,6 +80,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // change swapIndex
     document.querySelector("select#swap-select").onchange = e => {
+        render();
+    };
+
+    // change alternateIndex
+    document.querySelector("select#alternate-select").onchange = e => {
         render();
     };
 
@@ -116,14 +125,18 @@ function render() {
     const transparency = document.querySelector("input#enable-transparency").checked;
     const shadeIndex = document.querySelector("input#shade-range").value;
     const swapIndex = document.querySelector("select#swap-select").value || null;
+    const alternateIndex = document.querySelector("select#alternate-select").value || null;
     renderPalette(Globals.Palette);
-    renderShade(Globals.Palette, shadeIndex);
     renderShadeOptions(Globals.Palette);
-    renderLookup(Globals.Palette, Globals.Lookup, swapIndex);
+    renderShade(Globals.Palette, shadeIndex);    
     renderSwapOptions(Globals.Lookup);
-    renderArts(Globals.Palette, shadeIndex, Globals.Lookup, swapIndex, Globals.Arts, transparency);
+    renderLookup(Globals.Palette, Globals.Lookup, swapIndex);
+    renderAlternateOptions(Globals.Lookup);
+    renderAlternate(Globals.Palette, Globals.Lookup, alternateIndex);
+    renderArts(Globals.Palette, shadeIndex, Globals.Lookup, swapIndex, alternateIndex, Globals.Arts, transparency);
     document.querySelector("input#shade-range").value = shadeIndex;
     document.querySelector("select#swap-select").value = swapIndex || "";
+    document.querySelector("select#alternate-select").value = alternateIndex || "";    
 }
 
 // render palette
@@ -142,9 +155,9 @@ function renderPalette(palette) {
             const index = x + y * size;
             const color = palette.colors[index];
             const rect = `<rect 
-                data-selected="false" 
+                data-selected="${Globals.SelectedPaletteColorIndex === index}" 
                 onclick="selectPaletteColorIndex(this, ${index})" 
-                ondblclick="editPaletteTable(${index})" 
+                ondblclick="editPaletteTable(${index}, event)" 
                 x="${x * 16}" 
                 y="${y * 16}" 
                 width="16px" 
@@ -157,6 +170,13 @@ function renderPalette(palette) {
 
     svg.insertAdjacentHTML("beforeend", elements.join(""));
 
+}
+
+// render shade options (range max)
+function renderShadeOptions(palette) {
+    if (palette) {
+        document.querySelector("input#shade-range").setAttribute("max", palette.shades.length - 1);
+    }
 }
 
 // render shade
@@ -188,6 +208,18 @@ function renderShade(palette, shadeIndex) {
 
     svg.insertAdjacentHTML("beforeend", elements.join(""));
 
+}
+
+// render swap options
+function renderSwapOptions(lookup) {
+    if (lookup) {
+        const sort = (a, b) => parseInt(a.index) - parseInt(b.index);
+        const defaultOption = `<option value="">none</option>`;
+        const options = lookup.swaps.sort(sort).map((swap, i) => `
+            <option value="${i}">${swap.index}</option>
+        `);
+        document.querySelector("select#swap-select").innerHTML = [defaultOption].concat(options).join("");
+    }
 }
 
 // render lookup (swaped palette)
@@ -222,33 +254,59 @@ function renderLookup(palette, lookup, swapIndex) {
 
 }
 
-// render shade options (range max)
-function renderShadeOptions(palette) {
-    if (palette) {
-        document.querySelector("input#shade-range").setAttribute("max", palette.shades.length - 1);
+// render alternates options
+function renderAlternateOptions(lookup) {
+    if (lookup) {
+        const defaultOption = `<option value="">none</option>`;
+        const options = lookup.alternates.map((alternate, i) => `
+            <option value="${i}">${alternate.name}</option>
+        `);
+        document.querySelector("select#alternate-select").innerHTML = [defaultOption].concat(options).join("");
     }
 }
 
-// render swap options
-function renderSwapOptions(lookup) {
-    if (lookup) {
-        const sort = (a, b) => parseInt(a.index) - parseInt(b.index);
-        const defaultOption = `<option value="">default</option>`;
-        const options = lookup.swaps.sort(sort).map((swap, i) => `
-            <option value="${i}">${swap.index}</option>
-        `);
-        document.querySelector("select#swap-select").innerHTML = [defaultOption].concat(options).join("");
+// render alternate
+function renderAlternate(palette, lookup, alternateIndex) {
+
+    const svg = document.querySelector("svg#alternate-svg");
+
+    svg.innerHTML = "";
+
+    const elements = [];
+
+    const size = Math.sqrt(palette.colors.length);
+
+    const colors = alternateIndex ? lookup.alternates[alternateIndex].colors : palette.colors;
+
+    for (let x = 0; x < size; x++) {
+        for (let y = 0; y < size; y++) {
+            const index = x + y * size;
+            const color = colors[index];
+            const rect = `<rect 
+                ondblclick="editAlternateTable(${alternateIndex}, ${index})" 
+                x="${x * 16}" 
+                y="${y * 16}" 
+                width="16px" 
+                height="16px" 
+                fill="rgb(${color[0]},${color[1]},${color[2]})" 
+            />`;
+            elements.push(rect);
+        }
     }
+
+    svg.insertAdjacentHTML("beforeend", elements.join(""));
+
 }
 
 // render art
-function renderArts(palette, shadeIndex, lookup, swapIndex, arts, transparency) {
+function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts, transparency) {
 
     const grid = document.querySelector("div#tiles");
 
     grid.innerHTML = "";
 
-    let colors = palette.colors;
+    // apply alternate palette if any selected
+    let colors = alternateIndex ? lookup.alternates[alternateIndex].colors : palette.colors;
 
     // apply swap if any selected
     if (lookup && swapIndex !== null) {        
@@ -316,17 +374,74 @@ function selectPaletteColorIndex(element, colorIndex) {
 }
 
 // edit palette table
-function editPaletteTable(colorIndex) {
-    const currentColor = Globals.Palette.colors[colorIndex];    
-    const colorPicker = document.createElement("input");
-    colorPicker.focus();
-    colorPicker.value = currentColor.map(c => parseInt(c).toString(16).padStart(2, 0)).join("");
+function editPaletteTable(colorIndex, event) {
+
+    const currentColor = Globals.Palette.colors[colorIndex]; 
+
+    const colorPicker = document.createElement("input");    
+
+    document.body.appendChild(colorPicker);
+    
+    colorPicker.value = "#" + currentColor.map(c => parseInt(c).toString(16).padStart(2, 0)).join("");
     colorPicker.setAttribute("type", "color");
+    colorPicker.style.position = "absolute";
+    colorPicker.style.top = `${event.clientY}px`;
+    colorPicker.style.left = `${event.clientX}px`;
+
+    colorPicker.style.backgroundColor = "transparent";
+    colorPicker.style.border = "none";
+    colorPicker.style.width = "0px";
+    colorPicker.style.height = "0px";
+
     colorPicker.onchange = e => {
         Globals.Palette.colors[colorIndex] = e.target.value.slice(1).match(/.{1,2}/g).map(c => parseInt(c, 16));
         render();
+    };    
+    colorPicker.onblur = e => {
+        // remove itself
+        e.target.remove();
     };
+
+    colorPicker.focus();
     colorPicker.click();
+}
+
+// edit alternate table
+function editAlternateTable(alternateIndex, colorIndex) {
+
+    if (alternateIndex !== null) {
+
+        const currentColor = Globals.Lookup.alternates[alternateIndex].colors[colorIndex]; 
+
+        const colorPicker = document.createElement("input");    
+    
+        document.body.appendChild(colorPicker);
+        
+        colorPicker.value = "#" + currentColor.map(c => parseInt(c).toString(16).padStart(2, 0)).join("");
+        colorPicker.setAttribute("type", "color");
+        colorPicker.style.position = "absolute";
+        colorPicker.style.top = `${event.clientY}px`;
+        colorPicker.style.left = `${event.clientX}px`;
+    
+        colorPicker.style.backgroundColor = "transparent";
+        colorPicker.style.border = "none";
+        colorPicker.style.width = "0px";
+        colorPicker.style.height = "0px";
+    
+        colorPicker.onchange = e => {
+            Globals.Lookup.alternates[alternateIndex].colors[colorIndex] = e.target.value.slice(1).match(/.{1,2}/g).map(c => parseInt(c, 16));
+            render();
+        };    
+        colorPicker.onblur = e => {
+            // remove itself
+            e.target.remove();
+        };
+    
+        colorPicker.focus();
+        colorPicker.click();
+
+    }
+
 }
 
 // edit shade table

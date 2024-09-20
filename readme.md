@@ -14,6 +14,7 @@ https://phcs93.github.io/group-file-studio/
 
 # TO-DO
 
+- optimize all loops
 - figure out the transparency table (alpha blending?)
 - ability to replace a tile with some .PNG
 - ability to reorder tiles

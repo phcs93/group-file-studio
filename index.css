@@ -264,6 +264,7 @@ canvas {
     &:hover {
         cursor: grab;
         border: 1px solid white;
+        animation: blink 0.5s ease-in-out infinite;
     }
 }
 
@@ -291,12 +292,15 @@ svg {
 
 @keyframes blink {
     0% {
-        stroke: #000000;
+        stroke: #000000; /* svg */
+        border-color: #000000; /* canvas */
     }
     50% {
-        stroke: #FFFFFF;
+        stroke: #FFFFFF; /* svg */
+        border-color: #FFFFFF; /* canvas */
     }
     100% {
-        stroke: #000000;
+        stroke: #000000; /* svg */
+        border-color: #000000; /* canvas */
     }
 }
