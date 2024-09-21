@@ -538,3 +538,8 @@ function exportLookupFile() {
     downloadBlob(bytes, "LOOKUP.DAT", "application/octet-stream");
 
 }
+
+// export .art files
+function exportArtFiles() {
+    alert("NOT IMPLEMENTED YET");
+}
