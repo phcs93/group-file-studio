@@ -8,7 +8,7 @@ Globals = {
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    // change GRP
+    // upload GRP
     document.querySelector("input#grp-input").onchange = e => {
 
         const reader = new FileReader();
@@ -20,17 +20,17 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log(Globals.GRP);
 
             // palette
-            Globals.Palette = new Palette(Globals.GRP.getFile("PALETTE.DAT"));
+            Globals.Palette = new Palette(Globals.GRP.getFileBytes("PALETTE.DAT"));
             console.log(Globals.Palette);
 
             // lookup
-            Globals.Lookup = new Lookup(Globals.GRP.getFile("LOOKUP.DAT"));
+            Globals.Lookup = new Lookup(Globals.GRP.getFileBytes("LOOKUP.DAT"));
             console.log(Globals.Lookup);
 
             // all .art files in the grp
             Globals.Arts = [];
-            for (const artFile of Globals.GRP.files.filter(f => f.name.toUpperCase().endsWith(".ART"))) {
-                const art = new Art(Globals.GRP.getFile(artFile.name));
+            for (const file of Globals.GRP.files.filter(f => f.name.toUpperCase().endsWith(".ART"))) {
+                const art = new Art(Globals.GRP.getFileBytes(file.name), file.name);
                 Globals.Arts.push(art);
                 console.log(art);
             }
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
     };
 
-    // change palette
+    // upload palette
     document.querySelector("input#palette-input").onchange = e => {
         const reader = new FileReader();
         reader.onload = () => {
@@ -56,17 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
         reader.readAsArrayBuffer(e.target.files[0]);
     };
 
-    // change shade (only label for better feedback)
-    document.querySelector("input#shade-range").oninput = e => {
-        document.querySelector("label#shade-label").dataset.shade = e.target.value;
-    };
-
-    // change shade (when user stops sliding)
-    document.querySelector("input#shade-range").onchange = e => {
-        render();
-    };
-
-    // change lookup
+    // upload lookup
     document.querySelector("input#lookup-input").onchange = e => {
         const reader = new FileReader();
         reader.onload = () => {
@@ -78,6 +68,36 @@ document.addEventListener("DOMContentLoaded", () => {
         reader.readAsArrayBuffer(e.target.files[0]);
     };
 
+    // upload art
+    document.querySelector("input#art-input").onchange = async e => {
+        for (const file of e.target.files) {
+            const buffer = await file.arrayBuffer();
+            const bytes = new Uint8Array(buffer);
+            const art = new Art(bytes, file.name);
+            // check if uploaded tile should replace one of the current ones
+            const correspondingArtIndex = Globals.Arts.findIndex(a => a.localtilestart === art.localtilestart);
+            if (correspondingArtIndex > -1) {
+                Globals.Arts[correspondingArtIndex] = art;
+            } else {
+                Globals.Arts.push(art);
+            }            
+            console.log(art);
+        }
+        // sort based on "localtilestart"
+        Globals.Arts = Globals.Arts.sort((a,b) => a.localtilestart - b.localtilestart);
+        render();
+    };
+
+    // change shade (only label for better feedback)
+    document.querySelector("input#shade-range").oninput = e => {
+        document.querySelector("label#shade-label").dataset.shade = e.target.value;
+    };
+
+    // change shade (when user stops sliding)
+    document.querySelector("input#shade-range").onchange = e => {
+        render();
+    };
+
     // change swapIndex
     document.querySelector("select#swap-select").onchange = e => {
         render();
@@ -85,20 +105,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // change alternateIndex
     document.querySelector("select#alternate-select").onchange = e => {
-        render();
-    };
-
-    // change art
-    document.querySelector("input#art-input").onchange = async e => {
-        Globals.Arts = [];
-        const swap = document.querySelector("select#swap-select").value || null;
-        for (const file of e.target.files) {
-            const buffer = await file.arrayBuffer();
-            const bytes = new Uint8Array(buffer);
-            const art = new Art(bytes);
-            Globals.Arts.push(art);
-            console.log(art);
-        }
         render();
     };
 
@@ -301,9 +307,9 @@ function renderAlternate(palette, lookup, alternateIndex) {
 // render art
 function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts, transparency) {
 
-    const grid = document.querySelector("div#tiles");
+    const main = document.querySelector("div#tiles");
 
-    grid.innerHTML = "";
+    main.innerHTML = "";
 
     // apply alternate palette if any selected
     let colors = alternateIndex ? lookup.alternates[alternateIndex].colors : palette.colors;
@@ -319,6 +325,13 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
     for (let a = 0; a < arts.length; a++) {
 
         const art = arts[a];
+
+        const h1 = document.createElement("h1");
+        h1.innerHTML = `${art.name} [${art.localtilestart}-${art.localtileend}]`;
+        main.appendChild(h1);
+
+        const div = document.createElement("div");
+        div.setAttribute("class", "grow grid");
 
         for (let t = 0; t < art.tiles.length; t++) {
 
@@ -358,9 +371,11 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
                 canvas.setAttribute("title", `#${art.localtilestart + t}`);
             }
 
-            grid.appendChild(canvas);
+            div.appendChild(canvas);
 
         }
+
+        main.appendChild(div);
 
     }
 

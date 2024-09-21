@@ -240,10 +240,13 @@ div#menu {
     }
 }
 
-div.grid {    
+div#tiles {
     margin-top: 16px;
     margin-left: calc(256px + 32px + 32px);
     margin-right: 16px;
+}
+
+div.grid {    
     display: grid;
     grid-template-columns: repeat(auto-fill, var(--grid-size));
     grid-template-rows: repeat(auto-fill, var(--grid-size));

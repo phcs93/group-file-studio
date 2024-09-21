@@ -1,4 +1,6 @@
-function Art (bytes) {
+function Art (bytes, name) {
+
+    this.name = name;
 
     let index = 0; 
 

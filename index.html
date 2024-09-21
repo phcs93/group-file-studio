@@ -59,7 +59,7 @@
             <hr>
             <br>
                 
-            <label>PALETTE <span style="color: gray; font-weight: normal;">(overwrite the default file)</span></label>
+            <label>PALETTE <span style="color: gray; font-weight: normal;">(overwrites current palette file)</span></label>
             <input type="file" id="palette-input" accept=".dat">
             <br>
             <svg id="palette-svg"></svg>
@@ -75,7 +75,7 @@
             <hr>
             <br>
 
-            <label>LOOKUP <span style="color: gray; font-weight: normal;">(overwrite the default file)</span></label>
+            <label>LOOKUP <span style="color: gray; font-weight: normal;">(overwrites current lookup file)</span></label>
             <input type="file" id="lookup-input" accept=".dat">
             <br>
             <label>PALETTE SWAP NUMBER</label>
@@ -94,12 +94,18 @@
             <hr>
             <br>
 
-            <label>ART <span style="color: gray; font-weight: normal;">(you can select multiple files)</span></label>
-            <input type="file" id="art-input" accept=".art" multiple="true">
+            <label>ART <span style="color: gray; font-weight: normal;">(overwrites current loaded tiles)</span></label>
+            <input type="file" id="art-input" accept=".art" multiple="true">            
+            <br>
+            <span><span style="color: dodgerblue; font-weight: bold;">🛈</span> you can upload multiples files</span>
+            <br>
+            <span><span style="color: dodgerblue; font-weight: bold;">🛈</span> current ART files will be replaced by corresponding uploaded ART file base on "localtilestart"</span>
+            <br>
+            <button onclick="exportArtFiles()">EXPORT MODIFIED ART FILES (.ZIP)</button>
 
         </div>
 
-        <div id="tiles" class="grid grow" style="background-color: black;">
+        <div id="tiles" class="flex-rows grow" style="background-color: black;">
         
         </div>
 

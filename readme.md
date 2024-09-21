@@ -21,5 +21,3 @@ https://phcs93.github.io/group-file-studio/
 - ability to upload/edit/export a tiles.cfg (for Mapster32 tile groups)
 - make it look more like mapster
 - validate uploaded files (for example, check if the GRP is a valid GRP)
-- allow uploaded .ART files to replace already loaded ones => store .ART file names?
-  - do all .ART files contain the same number of tiles?

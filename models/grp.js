@@ -21,7 +21,7 @@ function GRP (bytes) {
     }
 
     // read only the bytes from the desired file
-    this.getFile = (name) => {
+    this.getFileBytes = (name) => {
 
         const filtered = this.files.filter(f => f.name.toUpperCase() === name.toUpperCase());
 
