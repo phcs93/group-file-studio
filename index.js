@@ -528,7 +528,7 @@ function editTileOrder4(event) {
         event.target.classList.remove("drag-over-left");
         event.target.classList.remove("drag-over-right");
         let toIndex = null;
-        if (event.offsetX / 64 < 0.5) {
+        if (event.offsetX / event.target.clientWidth < 0.5) {
             toIndex = parseInt(event.target.dataset.index);
         } else {
             toIndex = parseInt(event.target.dataset.index) + 1;
