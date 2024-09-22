@@ -265,9 +265,20 @@ canvas {
     object-fit: contain;
     image-rendering: pixelated;
     &:hover {
-        cursor: grab;
+        cursor: grab !important;
         border: 1px solid white;
         animation: blink 0.5s ease-in-out infinite;
+    }
+    &:active {
+        cursor: grabbing !important;
+    }
+    &.drag-over-left {
+        border-left: 1px solid white;
+        animation: blink-left 0.5s ease-in-out infinite;
+    }
+    &.drag-over-right {
+        border-right: 1px solid white;
+        animation: blink-right 0.5s ease-in-out infinite;
     }
 }
 
@@ -305,5 +316,38 @@ svg {
     100% {
         stroke: #000000; /* svg */
         border-color: #000000; /* canvas */
+    }
+}
+
+@keyframes blink-left {
+    0% { border-left-color: #000000; }
+    50% { border-left-color: #FFFFFF; }
+    100% { border-left-color: #000000; }
+}
+
+@keyframes blink-right {
+    0% { border-right-color: #000000; }
+    50% { border-right-color: #FFFFFF; }
+    100% { border-right-color: #000000; }
+}
+
+span.tip {
+    color: gray !important; 
+    font-weight: normal;
+    font-size: small;
+    &::before {
+        content: '🛈';
+        color: dodgerblue;
+        font-weight: bold;
+        margin-right: 4px;
+    }
+}
+
+label > span.tip {
+    &::before {
+        content: '';
+        color: transparent;
+        font-weight: bold;
+        margin-right: 0px;
     }
 }

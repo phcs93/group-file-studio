@@ -20,12 +20,18 @@ document.addEventListener("DOMContentLoaded", () => {
             console.log(Globals.GRP);
 
             // palette
-            Globals.Palette = new Palette(Globals.GRP.getFileBytes("PALETTE.DAT"));
+            const paletteBytes = Globals.GRP.getFileBytes("PALETTE.DAT");
+            Globals.Palette = new Palette(paletteBytes);
             console.log(Globals.Palette);
 
             // lookup
-            Globals.Lookup = new Lookup(Globals.GRP.getFileBytes("LOOKUP.DAT"));
-            console.log(Globals.Lookup);
+            const lookupBytes = Globals.GRP.getFileBytes("LOOKUP.DAT");
+            if (lookupBytes) {
+                Globals.Lookup = new Lookup(lookupBytes);
+                console.log(Globals.Lookup);
+            } else {
+                Globals.Lookup = null;
+            }
 
             // all .art files in the grp
             Globals.Arts = [];
@@ -34,6 +40,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 Globals.Arts.push(art);
                 console.log(art);
             }
+            // sort based on "localtilestart"
+            Globals.Arts = Globals.Arts.sort((a,b) => a.localtilestart - b.localtilestart);
 
             render();
 
@@ -218,6 +226,7 @@ function renderShade(palette, shadeIndex) {
 
 // render swap options
 function renderSwapOptions(lookup) {
+    document.querySelector("select#swap-select").innerHTML = "";
     if (lookup) {
         const sort = (a, b) => parseInt(a.index) - parseInt(b.index);
         const defaultOption = `<option value="">none</option>`;
@@ -232,36 +241,42 @@ function renderSwapOptions(lookup) {
 function renderLookup(palette, lookup, swapIndex) {
 
     const svg = document.querySelector("svg#lookup-svg");
-
     svg.innerHTML = "";
 
-    const elements = [];
+    if (lookup) {
 
-    const size = Math.sqrt(palette.colors.length);
+        const elements = [];
 
-    for (let x = 0; x < size; x++) {
-        for (let y = 0; y < size; y++) {
-            const index = x + y * size;
-            const colorIndex = swapIndex !== null ? lookup.swaps[swapIndex].table[index] : index;
-            const color = palette.colors[colorIndex];
-            const rect = `<rect 
-                onclick="editLookupTable(${swapIndex !== null ? swapIndex : "null"}, ${index})" 
-                x="${x * 16}" 
-                y="${y * 16}" 
-                width="16px" 
-                height="16px" 
-                fill="rgb(${color[0]},${color[1]},${color[2]})" 
-            />`;
-            elements.push(rect);
+        const size = Math.sqrt(palette.colors.length);
+
+        for (let x = 0; x < size; x++) {
+            for (let y = 0; y < size; y++) {
+                const index = x + y * size;
+                const colorIndex = swapIndex !== null ? lookup.swaps[swapIndex].table[index] : index;
+                const color = palette.colors[colorIndex];
+                const rect = `<rect 
+                    onclick="editLookupTable(${swapIndex !== null ? swapIndex : "null"}, ${index})" 
+                    x="${x * 16}" 
+                    y="${y * 16}" 
+                    width="16px" 
+                    height="16px" 
+                    fill="rgb(${color[0]},${color[1]},${color[2]})" 
+                />`;
+                elements.push(rect);
+            }
         }
-    }
 
-    svg.insertAdjacentHTML("beforeend", elements.join(""));
+        svg.insertAdjacentHTML("beforeend", elements.join(""));
+
+    } else {
+
+    }
 
 }
 
 // render alternates options
 function renderAlternateOptions(lookup) {
+    document.querySelector("select#alternate-select").innerHTML = "";
     if (lookup) {
         const defaultOption = `<option value="">none</option>`;
         const options = lookup.alternates.map((alternate, i) => `
@@ -275,32 +290,35 @@ function renderAlternateOptions(lookup) {
 function renderAlternate(palette, lookup, alternateIndex) {
 
     const svg = document.querySelector("svg#alternate-svg");
-
     svg.innerHTML = "";
 
-    const elements = [];
+    if (lookup) {
 
-    const size = Math.sqrt(palette.colors.length);
+        const elements = [];
 
-    const colors = alternateIndex ? lookup.alternates[alternateIndex].colors : palette.colors;
+        const size = Math.sqrt(palette.colors.length);
 
-    for (let x = 0; x < size; x++) {
-        for (let y = 0; y < size; y++) {
-            const index = x + y * size;
-            const color = colors[index];
-            const rect = `<rect 
-                ondblclick="editAlternateTable(${alternateIndex}, ${index})" 
-                x="${x * 16}" 
-                y="${y * 16}" 
-                width="16px" 
-                height="16px" 
-                fill="rgb(${color[0]},${color[1]},${color[2]})" 
-            />`;
-            elements.push(rect);
+        const colors = alternateIndex ? lookup.alternates[alternateIndex].colors : palette.colors;
+
+        for (let x = 0; x < size; x++) {
+            for (let y = 0; y < size; y++) {
+                const index = x + y * size;
+                const color = colors[index];
+                const rect = `<rect 
+                    ondblclick="editAlternateTable(${alternateIndex}, ${index})" 
+                    x="${x * 16}" 
+                    y="${y * 16}" 
+                    width="16px" 
+                    height="16px" 
+                    fill="rgb(${color[0]},${color[1]},${color[2]})" 
+                />`;
+                elements.push(rect);
+            }
         }
-    }
 
-    svg.insertAdjacentHTML("beforeend", elements.join(""));
+        svg.insertAdjacentHTML("beforeend", elements.join(""));
+
+    }
 
 }
 
@@ -331,13 +349,20 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
         main.appendChild(h1);
 
         const div = document.createElement("div");
-        div.setAttribute("class", "grow grid");
+        div.setAttribute("class", "grow grid");        
 
         for (let t = 0; t < art.tiles.length; t++) {
 
             const canvas = document.createElement("canvas");
-            canvas.dataset.picnum = art.localtilestart + t;
+            canvas.dataset.index = art.localtilestart + t;
+            canvas.setAttribute("draggable", "true");
+            canvas.setAttribute("ondragstart", `editTileOrder1(event)`);
+            canvas.setAttribute("ondragover", `editTileOrder2(event)`);
+            canvas.setAttribute("ondragleave", `editTileOrder3(event)`);
+            canvas.setAttribute("ondrop", `editTileOrder4(event)`);
+            
 
+            // tile = [x][y] = byte (palette color index)
             const tile = art.tiles[t];
 
             if (tile.length > 0) {
@@ -475,6 +500,76 @@ function editLookupTable(swapIndex, colorIndex) {
     }
 }
 
+// DRAG TILE
+function editTileOrder1(event) {
+    event.dataTransfer.setData("index", event.target.dataset.index);
+    event.dataTransfer.effectAllowed = "move";
+}
+function editTileOrder2(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    if (event.offsetX / event.target.clientWidth < 0.5) {
+        event.target.classList.add("drag-over-left");
+        event.target.classList.remove("drag-over-right");
+    } else {
+        event.target.classList.remove("drag-over-left");
+        event.target.classList.add("drag-over-right");
+    }
+}
+function editTileOrder3(event) {
+    event.preventDefault();
+    event.target.classList.remove("drag-over-left");
+    event.target.classList.remove("drag-over-right");
+}
+function editTileOrder4(event) {
+    event.preventDefault();
+    const fromIndex = parseInt(event.dataTransfer.getData("index"));
+    if (fromIndex) {
+        event.target.classList.remove("drag-over-left");
+        event.target.classList.remove("drag-over-right");
+        let toIndex = null;
+        if (event.offsetX / 64 < 0.5) {
+            toIndex = parseInt(event.target.dataset.index);
+        } else {
+            toIndex = parseInt(event.target.dataset.index) + 1;
+        }
+        editTileOrder(fromIndex, toIndex);
+    }
+}
+
+// editTileOrder
+function editTileOrder (fromIndex, toIndex) {
+
+    // group all tiles in a single array
+    const tiles = Globals.Arts.reduce((acc, crr) => { acc.push(...crr.tiles); return acc; }, []);
+
+    // move the tile
+    arraymove(tiles, fromIndex, toIndex);
+
+    // redistribute the files between the art files (based on localtilestart and localtileend)
+    // update tilesizx and tilesizy as well
+    // yeah, picanm will be fucked for now
+    for (const artIndex in Globals.Arts) {
+        const start = Globals.Arts[artIndex].localtilestart;
+        const end = Globals.Arts[artIndex].localtileend;
+        for (let i = start; i < end; i++) {
+            Globals.Arts[artIndex].tiles[i - start] = tiles[i];
+            Globals.Arts[artIndex].tilesizx[i - start] = tiles[i].length;
+            Globals.Arts[artIndex].tilesizy[i - start] = tiles[i][0] ? tiles[i][0].length : 0;
+        }
+    }
+
+    render();
+
+}
+
+// Globals.Arts.splice(toIndex + 1, 0, Globals.Arts.splice(fromIndex, 1)[0]);
+function arraymove(arr, fromIndex, toIndex) {
+    var element = arr[fromIndex];
+    arr.splice(fromIndex, 1);
+    arr.splice(toIndex, 0, element);
+}
+
 // export palette.dat
 function exportPaletteFile() {
 
@@ -541,5 +636,35 @@ function exportLookupFile() {
 
 // export .art files
 function exportArtFiles() {
-    alert("NOT IMPLEMENTED YET");
+    
+    const zip = new JSZip();
+
+    for (const art of Globals.Arts) {
+        const bytes = art.serialize();
+        zip.file(art.name, bytes, {binary:true});    
+    }    
+
+    downloadBlob = function (blob, fileName, mimeType) {
+        var url = window.URL.createObjectURL(blob);
+        downloadURL(url, fileName);
+        setTimeout(function () {
+            return window.URL.revokeObjectURL(url);
+        }, 1000);
+    };
+
+    downloadURL = function (data, fileName) {
+        var a;
+        a = document.createElement('a');
+        a.href = data;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.style = 'display: none';
+        a.click();
+        a.remove();
+    };
+
+    zip.generateAsync({type:'blob'}).then(content => {
+        downloadBlob(content, "arts.zip", "application/octet-stream");
+    });    
+
 }

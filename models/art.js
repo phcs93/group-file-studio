@@ -12,7 +12,7 @@ function Art (bytes, name) {
 
     this.version = int32();
 
-    int32(); // ignore numtiles    
+    this.numtiles = int32();
 
     this.localtilestart = int32();
     this.localtileend = int32();
@@ -47,5 +47,47 @@ function Art (bytes, name) {
 
     // prevent anything from being left behind
     this.remaining = bytes.slice(index);
+
+    // revert back to byte array
+    this.serialize = () => {
+
+        const int16ToBytes = (i) => [i>>0,i>>8];
+        const int32ToBytes = (i) => [i>>0,i>>8,i>>16,i>>24];
+        const int64ToBytes = (i) => [i>>0,i>>8,i>>16,i>>24,i>>32,i>>40,i>>48,i>>56];
+
+        const byteArray = [];
+
+        byteArray.push(...int32ToBytes(this.version));
+        byteArray.push(...int32ToBytes(this.numtiles));
+        byteArray.push(...int32ToBytes(this.localtilestart));
+        byteArray.push(...int32ToBytes(this.localtileend));
+        
+        for (let i = 0; i < this.tilesizx.length; i++) {
+            byteArray.push(...int16ToBytes(this.tilesizx[i]));
+        }
+
+        for (let i = 0; i < this.tilesizy.length; i++) {
+            byteArray.push(...int16ToBytes(this.tilesizy[i]));
+        }        
+
+        for (let i = 0; i < this.picanm.length; i++) {
+            byteArray.push(...int32ToBytes(this.picanm[i]));
+        }
+
+        for (let i = 0; i < this.tiles.length; i++) {
+            for (let x = 0; x < this.tilesizx[i] ; x++) {
+                for (let y = 0; y < this.tilesizy[i]; y++) {
+                    byteArray.push(this.tiles[i][x][y]);
+                }
+            }
+        }
+
+        // add remaining bytes if any
+        byteArray.push(...this.remaining);
+
+        // convert to uint8array (not sure if necessary)
+        return new Uint8Array(byteArray);
+
+    };
 
 }

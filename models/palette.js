@@ -41,6 +41,10 @@ function Palette (bytes) {
     // revert back to byte array
     this.serialize = () => {
 
+        const int16ToBytes = (i) => [i>>0,i>>8];
+        const int32ToBytes = (i) => [i>>0,i>>8,i>>16,i>>24];
+        const int64ToBytes = (i) => [i>>0,i>>8,i>>16,i>>24,i>>32,i>>40,i>>48,i>>56];
+
         const byteArray = [];
 
         // 256 pairs of [byte,byte,byte] scaled down to 0...64
@@ -51,6 +55,9 @@ function Palette (bytes) {
             const b = lerp(0, 64, color[2] / 255);
             byteArray.push(...[r,g,b]);
         }
+
+        // shades number
+        byteArray.push(...int16ToBytes(this.shades.length));
 
         // arrays of 256 bytes
         for (let i = 0; i < this.shades.length; i++) {

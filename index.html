@@ -11,10 +11,12 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">    
 
+        <script type="application/javascript" src="jszip.min.js"></script>
+        
         <script type="application/javascript" src="models/grp.js"></script>
         <script type="application/javascript" src="models/palette.js"></script>
         <script type="application/javascript" src="models/lookup.js"></script>
-        <script type="application/javascript" src="models/art.js"></script>
+        <script type="application/javascript" src="models/art.js"></script>        
 
         <!-- index -->
         <link rel="stylesheet" href="index.css">
@@ -33,7 +35,7 @@
             <hr>
             <br>
 
-            <label>GRP <span style="color: gray; font-weight: normal;">(this will load all other files)</span></label>
+            <label>GRP <span class="tip">(this will load all other files)</span></label>
             <input type="file" id="grp-input" accept=".grp">
 
             <br>
@@ -59,14 +61,19 @@
             <hr>
             <br>
                 
-            <label>PALETTE <span style="color: gray; font-weight: normal;">(overwrites current palette file)</span></label>
+            <label>PALETTE <span class="tip">(overwrites current palette file)</span></label>
             <input type="file" id="palette-input" accept=".dat">
+            <br>
+            <span class="tip">(click to select as brush)</span>
+            <span class="tip">(double click to edit color)</span>
             <br>
             <svg id="palette-svg"></svg>
             <br>
             <label id="shade-label" data-shade="0">SHADE</label>
             <input type="range" id="shade-range" min="0" max="0" step="1">
             <br>
+            <span class="tip">(click to set color to selected brush)</span>
+            <br>            
             <svg id="shade-svg"></svg>
             <br>
             <button onclick="exportPaletteFile()">EXPORT MODIFIED PALETTE.DAT</button>
@@ -75,17 +82,21 @@
             <hr>
             <br>
 
-            <label>LOOKUP <span style="color: gray; font-weight: normal;">(overwrites current lookup file)</span></label>
+            <label>LOOKUP <span class="tip">(overwrites current lookup file)</span></label>
             <input type="file" id="lookup-input" accept=".dat">
             <br>
             <label>PALETTE SWAP NUMBER</label>
             <select id="swap-select"></select>
             <br>
+            <span class="tip">(click to set color to selected brush)</span>
+            <br>
             <svg id="lookup-svg"></svg>
             <br>
-            <label>ALTERNATIVE GLOBAL PALETTE (DN3D)</label>
+            <label>ALTERNATIVE GLOBAL PALETTE</label>
             <select id="alternate-select"></select>
             <br>
+            <span class="tip">(double click to edit color)</span>
+            <br>    
             <svg id="alternate-svg"></svg>
             <br>
             <button onclick="exportLookupFile()">EXPORT MODIFIED LOOKUP.DAT</button>
@@ -94,12 +105,11 @@
             <hr>
             <br>
 
-            <label>ART <span style="color: gray; font-weight: normal;">(overwrites current loaded tiles)</span></label>
+            <label>ART <span class="tip">(overwrites current loaded tiles)</span></label>
             <input type="file" id="art-input" accept=".art" multiple="true">            
             <br>
-            <span><span style="color: dodgerblue; font-weight: bold;">🛈</span> you can upload multiples files</span>
-            <br>
-            <span><span style="color: dodgerblue; font-weight: bold;">🛈</span> current ART files will be replaced by corresponding uploaded ART file base on "localtilestart"</span>
+            <span class="tip">you can upload multiples files</span>
+            <span class="tip">current ART files will be replaced by corresponding uploaded ART file base on "localtilestart"</span>
             <br>
             <button onclick="exportArtFiles()">EXPORT MODIFIED ART FILES (.ZIP)</button>
 

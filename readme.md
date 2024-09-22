@@ -14,10 +14,15 @@ https://phcs93.github.io/group-file-studio/
 
 # TO-DO
 
+- ability to edit animations (because these will be messed by the tile reordering)
+- ability to replace a tile with some .PNG
+    - figure out how to convert uploaded image to palette
 - optimize all loops
 - figure out the transparency table (alpha blending?)
-- ability to replace a tile with some .PNG
-- ability to reorder tiles
 - ability to upload/edit/export a tiles.cfg (for Mapster32 tile groups)
 - make it look more like mapster
 - validate uploaded files (for example, check if the GRP is a valid GRP)
+
+# BUG
+
+- cant scroll while dragging

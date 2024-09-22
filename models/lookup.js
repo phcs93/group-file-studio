@@ -20,7 +20,6 @@ function Lookup (bytes) {
         };
     }
 
-    // only in duke nukem 3d?
     this.alternates = new Array(6);
 
     for (let i = 0; i < this.alternates.length; i++) {        
@@ -48,6 +47,10 @@ function Lookup (bytes) {
 
     // revert back to byte array
     this.serialize = () => {
+
+        const int16ToBytes = (i) => [i>>0,i>>8];
+        const int32ToBytes = (i) => [i>>0,i>>8,i>>16,i>>24];
+        const int64ToBytes = (i) => [i>>0,i>>8,i>>16,i>>24,i>>32,i>>40,i>>48,i>>56];
 
         const byteArray = [];        
 
