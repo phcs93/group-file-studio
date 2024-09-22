@@ -14,6 +14,7 @@ https://phcs93.github.io/group-file-studio/
 
 # TO-DO
 
+- add feature to just "swap" tiles when dropping in the middle
 - ability to edit animations (because these will be messed by the tile reordering)
 - ability to replace a tile with some .PNG
     - figure out how to convert uploaded image to palette
