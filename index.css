@@ -272,6 +272,10 @@ canvas {
     &:active {
         cursor: grabbing !important;
     }
+    &.drag-over-center {
+        border: 1px solid white;
+        animation: blink 0.5s ease-in-out infinite;
+    }
     &.drag-over-left {
         border-left: 1px solid white;
         animation: blink-left 0.5s ease-in-out infinite;

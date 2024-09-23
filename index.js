@@ -132,6 +132,81 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll("div.grid").forEach(grid => grid.dataset.background = e.target.checked);
     };
 
+    // dag tile
+    document.body.addEventListener("dragstart", e => {
+        if (e.target.tagName.toLowerCase() === "canvas" && e.target.draggable) {
+            e.dataTransfer.setData("index", e.target.dataset.index);
+            e.dataTransfer.effectAllowed = "move";
+        }
+    });    
+
+    // drag tile over another
+    document.body.addEventListener("dragover", e => {
+        if (e.target.tagName.toLowerCase() === "canvas" && e.target.draggable) {            
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+            const position = e.offsetX / e.target.clientWidth;
+            if (position < 0.25) {
+                e.target.classList.add("drag-over-left");             
+                e.target.classList.remove("drag-over-center");
+                e.target.classList.remove("drag-over-right");
+            } else if (position > 0.75) {        
+                e.target.classList.add("drag-over-right");
+                e.target.classList.remove("drag-over-center");
+                e.target.classList.remove("drag-over-left");
+            } else {
+                e.target.classList.add("drag-over-center");
+                e.target.classList.remove("drag-over-left");
+                e.target.classList.remove("drag-over-right");
+            }
+        }
+    });    
+
+    // drag tile out of another
+    document.body.addEventListener("dragleave", e => {
+        if (e.target.tagName.toLowerCase() === "canvas" && e.target.draggable) {
+            e.preventDefault();
+            e.target.classList.remove("drag-over-center");
+            e.target.classList.remove("drag-over-left");
+            e.target.classList.remove("drag-over-right");
+        }
+    });    
+
+    // drop tile
+    document.body.addEventListener("drop", e => {
+        if (e.target.tagName.toLowerCase() === "canvas" && e.target.draggable) {
+            e.preventDefault();
+            const fromIndex = parseInt(e.dataTransfer.getData("index"));
+            if (fromIndex || fromIndex === 0) {
+                e.target.classList.remove("drag-over-center");
+                e.target.classList.remove("drag-over-left");
+                e.target.classList.remove("drag-over-right");
+                let toIndex = parseInt(e.target.dataset.index);
+                let swap = false;
+                const position = e.offsetX / e.target.clientWidth;
+                if (position < 0.25) {
+                    if (fromIndex < toIndex) {
+                        toIndex = toIndex - 1;
+                    } else {
+                        toIndex = toIndex;
+                    }            
+                    swap = false;
+                } else if (position > 0.75) {        
+                    if (fromIndex > toIndex) {
+                        toIndex = toIndex + 1;
+                    } else {
+                        toIndex = toIndex;
+                    }         
+                    swap = false;
+                } else {
+                    toIndex = toIndex;
+                    swap = true;
+                }
+                editTileOrder(fromIndex, toIndex, swap);
+            }
+        }
+    });
+
 });
 
 // render everything
@@ -268,8 +343,6 @@ function renderLookup(palette, lookup, swapIndex) {
 
         svg.insertAdjacentHTML("beforeend", elements.join(""));
 
-    } else {
-
     }
 
 }
@@ -355,11 +428,8 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
 
             const canvas = document.createElement("canvas");
             canvas.dataset.index = art.localtilestart + t;
+            //canvas.setAttribute("download", `${art.name}-${t}.png`);
             canvas.setAttribute("draggable", "true");
-            canvas.setAttribute("ondragstart", `editTileOrder1(event)`);
-            canvas.setAttribute("ondragover", `editTileOrder2(event)`);
-            canvas.setAttribute("ondragleave", `editTileOrder3(event)`);
-            canvas.setAttribute("ondrop", `editTileOrder4(event)`);
             
 
             // tile = [x][y] = byte (palette color index)
@@ -500,51 +570,21 @@ function editLookupTable(swapIndex, colorIndex) {
     }
 }
 
-// DRAG TILE
-function editTileOrder1(event) {
-    event.dataTransfer.setData("index", event.target.dataset.index);
-    event.dataTransfer.effectAllowed = "move";
-}
-function editTileOrder2(event) {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = "move";
-    if (event.offsetX / event.target.clientWidth < 0.5) {
-        event.target.classList.add("drag-over-left");
-        event.target.classList.remove("drag-over-right");
-    } else {
-        event.target.classList.remove("drag-over-left");
-        event.target.classList.add("drag-over-right");
-    }
-}
-function editTileOrder3(event) {
-    event.preventDefault();
-    event.target.classList.remove("drag-over-left");
-    event.target.classList.remove("drag-over-right");
-}
-function editTileOrder4(event) {
-    event.preventDefault();
-    const fromIndex = parseInt(event.dataTransfer.getData("index"));
-    if (fromIndex) {
-        event.target.classList.remove("drag-over-left");
-        event.target.classList.remove("drag-over-right");
-        let toIndex = null;
-        if (event.offsetX / event.target.clientWidth < 0.5) {
-            toIndex = parseInt(event.target.dataset.index);
-        } else {
-            toIndex = parseInt(event.target.dataset.index) + 1;
-        }
-        editTileOrder(fromIndex, toIndex);
-    }
-}
-
-// editTileOrder
-function editTileOrder (fromIndex, toIndex) {
+// edit tile order
+function editTileOrder (fromIndex, toIndex, swap) {
 
     // group all tiles in a single array
     const tiles = Globals.Arts.reduce((acc, crr) => { acc.push(...crr.tiles); return acc; }, []);
 
     // move the tile
-    arraymove(tiles, fromIndex, toIndex);
+    if (swap) {
+        const tile1 = tiles[fromIndex];
+        const tile2 = tiles[toIndex];
+        tiles[fromIndex] = tile2;
+        tiles[toIndex] = tile1;
+    } else {
+        tiles.splice(toIndex, 0, tiles.splice(fromIndex, 1)[0]);
+    }
 
     // redistribute the files between the art files (based on localtilestart and localtileend)
     // update tilesizx and tilesizy as well
@@ -561,13 +601,6 @@ function editTileOrder (fromIndex, toIndex) {
 
     render();
 
-}
-
-// Globals.Arts.splice(toIndex + 1, 0, Globals.Arts.splice(fromIndex, 1)[0]);
-function arraymove(arr, fromIndex, toIndex) {
-    var element = arr[fromIndex];
-    arr.splice(fromIndex, 1);
-    arr.splice(toIndex, 0, element);
 }
 
 // export palette.dat

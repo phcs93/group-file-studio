@@ -53,17 +53,14 @@ function Lookup (bytes) {
         const int64ToBytes = (i) => [i>>0,i>>8,i>>16,i>>24,i>>32,i>>40,i>>48,i>>56];
 
         const byteArray = [];        
-
-        // first byte is the number of swap tables
+        
         byteArray.push(this.swaps.length);
-
-        // the rest of the bytes are the swap table index + the table itself
+        
         for (let i = 0; i < this.swaps.length; i++) {        
             byteArray.push(this.swaps[i].index);
             byteArray.push(...this.swaps[i].table);
         }
 
-        // alternative palette tables => arrays of 256 [byte,byte,byte] byte arrays scaled down to 0...64
         for (let i = 0; i < this.alternatives.length; i++) {
             const color = this.alternatives[i].colors;
             const r = lerp(0, 64, color[0] / 255);
