@@ -11,9 +11,7 @@ function Art (bytes, name) {
     const int64 = () => b(0)|b(8)|b(16)|b(24)|b(32)|b(40)|b(48)|b(56);
 
     this.version = int32();
-
     this.numtiles = int32();
-
     this.localtilestart = int32();
     this.localtileend = int32();
 

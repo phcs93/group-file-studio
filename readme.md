@@ -14,6 +14,11 @@ https://phcs93.github.io/group-file-studio/
 
 # TO-DO
 
+- improve the ux
+    - ability to unload .art files
+    - disable upload lookup file button if no palette is loaded
+    - disable upload art files button if no palette is loaded
+
 - **ability to edit tile pixels with loaded palette colors**
 
 - ability to edit animations (because these will be messed by the tile reordering feature)

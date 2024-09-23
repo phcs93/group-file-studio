@@ -1,3 +1,15 @@
+var startTime, endTime;
+
+function start() {
+  startTime = new Date();
+};
+
+function end(name) {
+  endTime = new Date();
+  var timeDiff = endTime - startTime; //in ms
+  console.log(`${name} = `, timeDiff + "ms");
+}
+
 Globals = {
     GRP: null,
     Pelette: null,
@@ -461,6 +473,10 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
     // apply shade
     colors = colors.map((c, i) => colors[palette.shades[shadeIndex][i]]);
 
+    const enableBackground = document.querySelector("input#enable-background").checked;
+
+    start();
+
     for (let a = 0; a < arts.length; a++) {
 
         const art = arts[a];
@@ -477,6 +493,7 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
 
         const div = document.createElement("div");
         div.setAttribute("class", "grow grid");
+        div.dataset.background = enableBackground;
 
         for (let t = 0; t < art.tiles.length; t++) {
 
@@ -485,7 +502,6 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
             canvas.dataset.artIndex = a; // this is only used for the edit tile
             //canvas.setAttribute("download", `${art.name}-${t}.png`);
             canvas.setAttribute("draggable", "true");
-
 
             // tile = [x][y] = byte (palette color index)
             const tile = art.tiles[t];
@@ -528,6 +544,8 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
         main.appendChild(div);
 
     }
+
+    end("renderArts()");
 
 }
 
