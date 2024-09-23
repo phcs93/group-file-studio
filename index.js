@@ -2,7 +2,7 @@ Globals = {
     GRP: null,
     Pelette: null,
     Lookup: null,
-    Arts: [],    
+    Arts: [],
     SelectedPaletteColorIndex: null
 };
 
@@ -41,14 +41,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.log(art);
             }
             // sort based on "localtilestart"
-            Globals.Arts = Globals.Arts.sort((a,b) => a.localtilestart - b.localtilestart);
+            Globals.Arts = Globals.Arts.sort((a, b) => a.localtilestart - b.localtilestart);
 
             render();
 
         };
 
         reader.readAsArrayBuffer(e.target.files[0]);
-        
+
     };
 
     // upload palette
@@ -88,11 +88,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 Globals.Arts[correspondingArtIndex] = art;
             } else {
                 Globals.Arts.push(art);
-            }            
+            }
             console.log(art);
         }
         // sort based on "localtilestart"
-        Globals.Arts = Globals.Arts.sort((a,b) => a.localtilestart - b.localtilestart);
+        Globals.Arts = Globals.Arts.sort((a, b) => a.localtilestart - b.localtilestart);
         render();
     };
 
@@ -132,25 +132,73 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll("div.grid").forEach(grid => grid.dataset.background = e.target.checked);
     };
 
+    // change tile (double click)
+    document.body.addEventListener("dblclick", async e => {
+        if (e.target.tagName.toLowerCase() === "canvas" /*&& e.target.draggable*/) {
+            const tileIndex = e.target.dataset.index;
+            const artIndex = e.target.dataset.artIndex;
+            const [file] = await showOpenFilePicker({
+                types: [
+                    {
+                        description: "Images",
+                        accept: {
+                            "image/*": [".png", ".gif", ".jpeg", ".jpg"],
+                        }
+                    }
+                ],
+                excludeAcceptAllOption: true,
+                multiple: false
+            });
+            const image = new Image(); // this is an actual <img> tag element
+            image.src = URL.createObjectURL(await file.getFile());
+            image.onload = () => {
+                const canvas = document.createElement("canvas");
+                const context = canvas.getContext("2d");
+                canvas.width = image.width;
+                canvas.height = image.height;
+                context.drawImage(image, 0, 0);
+                const data = context.getImageData(0, 0, canvas.width, canvas.height).data;
+                const pixels = [];
+                for (let y = 0; y < canvas.height; y++) {
+                    const row = [];
+                    for (let x = 0; x < canvas.width; x++) {
+                        const offset = (y * canvas.width + x) * 4;
+                        const pixel = [
+                            data[offset + 0], // r
+                            data[offset + 1], // g
+                            data[offset + 2], // b
+                            data[offset + 3]  // alpha
+                        ];
+                        row.push(pixel);
+                    }
+                    pixels.push(row);
+                }
+                editTile(artIndex, tileIndex, pixels);
+            };
+        }
+    });
+
     // dag tile
     document.body.addEventListener("dragstart", e => {
         if (e.target.tagName.toLowerCase() === "canvas" && e.target.draggable) {
             e.dataTransfer.setData("index", e.target.dataset.index);
             e.dataTransfer.effectAllowed = "move";
+        } else {
+            e.preventDefault();
         }
-    });    
+    });
 
     // drag tile over another
     document.body.addEventListener("dragover", e => {
-        if (e.target.tagName.toLowerCase() === "canvas" && e.target.draggable) {            
+        if (e.target.tagName.toLowerCase() === "canvas" && e.target.draggable) {
             e.preventDefault();
             e.dataTransfer.dropEffect = "move";
             const position = e.offsetX / e.target.clientWidth;
             if (position < 0.25) {
-                e.target.classList.add("drag-over-left");             
+                e.target.classList.add("drag-over-left");
                 e.target.classList.remove("drag-over-center");
                 e.target.classList.remove("drag-over-right");
-            } else if (position > 0.75) {        
+            } else if (position > 0.75) {
                 e.target.classList.add("drag-over-right");
                 e.target.classList.remove("drag-over-center");
                 e.target.classList.remove("drag-over-left");
@@ -160,7 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 e.target.classList.remove("drag-over-right");
             }
         }
-    });    
+    });
 
     // drag tile out of another
     document.body.addEventListener("dragleave", e => {
@@ -170,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
             e.target.classList.remove("drag-over-left");
             e.target.classList.remove("drag-over-right");
         }
-    });    
+    });
 
     // drop tile
     document.body.addEventListener("drop", e => {
@@ -189,14 +237,14 @@ document.addEventListener("DOMContentLoaded", () => {
                         toIndex = toIndex - 1;
                     } else {
                         toIndex = toIndex;
-                    }            
+                    }
                     swap = false;
-                } else if (position > 0.75) {        
+                } else if (position > 0.75) {
                     if (fromIndex > toIndex) {
                         toIndex = toIndex + 1;
                     } else {
                         toIndex = toIndex;
-                    }         
+                    }
                     swap = false;
                 } else {
                     toIndex = toIndex;
@@ -217,7 +265,7 @@ function render() {
     const alternateIndex = document.querySelector("select#alternate-select").value || null;
     renderPalette(Globals.Palette);
     renderShadeOptions(Globals.Palette);
-    renderShade(Globals.Palette, shadeIndex);    
+    renderShade(Globals.Palette, shadeIndex);
     renderSwapOptions(Globals.Lookup);
     renderLookup(Globals.Palette, Globals.Lookup, swapIndex);
     renderAlternateOptions(Globals.Lookup);
@@ -225,7 +273,7 @@ function render() {
     renderArts(Globals.Palette, shadeIndex, Globals.Lookup, swapIndex, alternateIndex, Globals.Arts, transparency);
     document.querySelector("input#shade-range").value = shadeIndex;
     document.querySelector("select#swap-select").value = swapIndex || "";
-    document.querySelector("select#alternate-select").value = alternateIndex || "";    
+    document.querySelector("select#alternate-select").value = alternateIndex || "";
 }
 
 // render palette
@@ -406,7 +454,7 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
     let colors = alternateIndex ? lookup.alternates[alternateIndex].colors : palette.colors;
 
     // apply swap if any selected
-    if (lookup && swapIndex !== null) {        
+    if (lookup && swapIndex !== null) {
         colors = colors.map((c, i) => colors[lookup.swaps[swapIndex].table[i]]);
     }
 
@@ -421,16 +469,23 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
         h1.innerHTML = `${art.name} [${art.localtilestart}-${art.localtileend}]`;
         main.appendChild(h1);
 
+        main.insertAdjacentHTML("beforeend", `
+            <span class="tip">drag and drop to reorder or swap tiles</span>
+            <span class="tip">double click to change tile</span>
+            <br>
+        `);
+
         const div = document.createElement("div");
-        div.setAttribute("class", "grow grid");        
+        div.setAttribute("class", "grow grid");
 
         for (let t = 0; t < art.tiles.length; t++) {
 
             const canvas = document.createElement("canvas");
             canvas.dataset.index = art.localtilestart + t;
+            canvas.dataset.artIndex = a; // this is only used for the edit tile
             //canvas.setAttribute("download", `${art.name}-${t}.png`);
             canvas.setAttribute("draggable", "true");
-            
+
 
             // tile = [x][y] = byte (palette color index)
             const tile = art.tiles[t];
@@ -486,12 +541,12 @@ function selectPaletteColorIndex(element, colorIndex) {
 // edit palette table
 function editPaletteTable(colorIndex, event) {
 
-    const currentColor = Globals.Palette.colors[colorIndex]; 
+    const currentColor = Globals.Palette.colors[colorIndex];
 
-    const colorPicker = document.createElement("input");    
+    const colorPicker = document.createElement("input");
 
     document.body.appendChild(colorPicker);
-    
+
     colorPicker.value = "#" + currentColor.map(c => parseInt(c).toString(16).padStart(2, 0)).join("");
     colorPicker.setAttribute("type", "color");
     colorPicker.style.position = "absolute";
@@ -506,7 +561,7 @@ function editPaletteTable(colorIndex, event) {
     colorPicker.onchange = e => {
         Globals.Palette.colors[colorIndex] = e.target.value.slice(1).match(/.{1,2}/g).map(c => parseInt(c, 16));
         render();
-    };    
+    };
     colorPicker.onblur = e => {
         // remove itself
         e.target.remove();
@@ -521,32 +576,32 @@ function editAlternateTable(alternateIndex, colorIndex) {
 
     if (alternateIndex !== null) {
 
-        const currentColor = Globals.Lookup.alternates[alternateIndex].colors[colorIndex]; 
+        const currentColor = Globals.Lookup.alternates[alternateIndex].colors[colorIndex];
 
-        const colorPicker = document.createElement("input");    
-    
+        const colorPicker = document.createElement("input");
+
         document.body.appendChild(colorPicker);
-        
+
         colorPicker.value = "#" + currentColor.map(c => parseInt(c).toString(16).padStart(2, 0)).join("");
         colorPicker.setAttribute("type", "color");
         colorPicker.style.position = "absolute";
         colorPicker.style.top = `${event.clientY}px`;
         colorPicker.style.left = `${event.clientX}px`;
-    
+
         colorPicker.style.backgroundColor = "transparent";
         colorPicker.style.border = "none";
         colorPicker.style.width = "0px";
         colorPicker.style.height = "0px";
-    
+
         colorPicker.onchange = e => {
             Globals.Lookup.alternates[alternateIndex].colors[colorIndex] = e.target.value.slice(1).match(/.{1,2}/g).map(c => parseInt(c, 16));
             render();
-        };    
+        };
         colorPicker.onblur = e => {
             // remove itself
             e.target.remove();
         };
-    
+
         colorPicker.focus();
         colorPicker.click();
 
@@ -570,8 +625,56 @@ function editLookupTable(swapIndex, colorIndex) {
     }
 }
 
+// edit tile
+function editTile (artIndex, tileIndex, pixels) {
+
+    const findClosestColor = (color, colors) => {
+        let closestColorIndex = null;
+        let minDistance = Infinity;
+        for (let index = 0; index < colors.length; index++) {
+            const c = colors[index];
+            // get eucliedean distance between the two colors
+            const distance = Math.sqrt(
+                Math.pow(color[0] - c[0], 2) +
+                Math.pow(color[1] - c[1], 2) +
+                Math.pow(color[2] - c[2], 2)
+            );
+            // using less or equal ensures that the last index has priority
+            // so transparency will always be prioritized
+            if (distance <= minDistance) {
+                minDistance = distance;
+                closestColorIndex = index;
+            }
+        }
+        return closestColorIndex;
+    };
+
+    const localTileIndex = tileIndex - Globals.Arts[artIndex].localtilestart;
+
+    for (let y = 0; y < pixels[0].length; y++) {
+        Globals.Arts[artIndex].tiles[localTileIndex][y] = [];
+        for (let x = 0; x < pixels.length; x++) {
+            const pixelColor = pixels[x][y];
+            let colorIndex = null;
+            if (pixelColor[3] === 0) { // if alpha is zero => set to transparent
+                colorIndex = 255;
+            } else {
+                colorIndex = findClosestColor(pixelColor, Globals.Palette.colors);
+            }
+            Globals.Arts[artIndex].tiles[localTileIndex][y][x] = colorIndex;
+        }
+    }
+
+    // update tilesizx and tilesizy
+    Globals.Arts[artIndex].tilesizx[localTileIndex] = pixels.length;
+    Globals.Arts[artIndex].tilesizy[localTileIndex] = pixels[0].length;
+
+    render();
+
+}
+
 // edit tile order
-function editTileOrder (fromIndex, toIndex, swap) {
+function editTileOrder(fromIndex, toIndex, swap) {
 
     // group all tiles in a single array
     const tiles = Globals.Arts.reduce((acc, crr) => { acc.push(...crr.tiles); return acc; }, []);
@@ -669,13 +772,13 @@ function exportLookupFile() {
 
 // export .art files
 function exportArtFiles() {
-    
+
     const zip = new JSZip();
 
     for (const art of Globals.Arts) {
         const bytes = art.serialize();
-        zip.file(art.name, bytes, {binary:true});    
-    }    
+        zip.file(art.name, bytes, { binary: true });
+    }
 
     downloadBlob = function (blob, fileName, mimeType) {
         var url = window.URL.createObjectURL(blob);
@@ -696,8 +799,8 @@ function exportArtFiles() {
         a.remove();
     };
 
-    zip.generateAsync({type:'blob'}).then(content => {
+    zip.generateAsync({ type: 'blob' }).then(content => {
         downloadBlob(content, "arts.zip", "application/octet-stream");
-    });    
+    });
 
 }

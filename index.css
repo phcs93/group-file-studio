@@ -355,3 +355,7 @@ label > span.tip {
         margin-right: 0px;
     }
 }
+
+h1 {
+    margin-bottom: 0px;
+}
