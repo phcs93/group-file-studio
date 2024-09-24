@@ -27,7 +27,7 @@ https://phcs93.github.io/group-file-studio/
 
 - ability to upload/edit/export a tiles.cfg (for Mapster32 tile groups)
 
-- change the menu a little bit to show a file tree of the GRP, and display a differente "editing tool" depending on the selected file
+- change the menu a little bit to show a file tree of the GRP, and display a different "editing tool" depending on the selected file
     - display a sound player for .VOC and .MID files
     - render .MAP files (2d view only just like [my other project does](https://github.com/phcs93/duke-map-viewer))
     - i don't know what to do with .ANM and .CON files (probably nothing)
