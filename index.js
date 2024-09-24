@@ -1,15 +1,3 @@
-var startTime, endTime;
-
-function start() {
-  startTime = new Date();
-};
-
-function end(name) {
-  endTime = new Date();
-  var timeDiff = endTime - startTime; //in ms
-  console.log(`${name} = `, timeDiff + "ms");
-}
-
 Globals = {
     GRP: null,
     Pelette: null,
@@ -141,7 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // change enable background
     document.querySelector("input#enable-background").onchange = e => {
-        document.querySelectorAll("div.grid").forEach(grid => grid.dataset.background = e.target.checked);
+        document.querySelector("div#tiles").dataset.background = e.target.checked;
     };
 
     // change tile (double click)
@@ -473,9 +461,7 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
     // apply shade
     colors = colors.map((c, i) => colors[palette.shades[shadeIndex][i]]);
 
-    const enableBackground = document.querySelector("input#enable-background").checked;
-
-    start();
+    const startTime = new Date(); // for calculating performance
 
     for (let a = 0; a < arts.length; a++) {
 
@@ -493,7 +479,6 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
 
         const div = document.createElement("div");
         div.setAttribute("class", "grow grid");
-        div.dataset.background = enableBackground;
 
         for (let t = 0; t < art.tiles.length; t++) {
 
@@ -510,6 +495,9 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
 
                 canvas.dataset.width = tile.length;
                 canvas.dataset.height = tile[0].length;
+
+                //canvas.dataset.animation = art.picanm[t].frames > 0;
+                //canvas.dataset.animation = art.picanm[t].type === 3;
 
                 canvas.setAttribute("title", `#${art.localtilestart + t} [${tile.length}x${tile[0].length}]`);
                 canvas.width = tile.length;
@@ -545,7 +533,9 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
 
     }
 
-    end("renderArts()");
+    const endTime = new Date();
+    const timeDiff = endTime - startTime; // in ms
+    console.log(`renderArts() took ${timeDiff}ms`);
 
 }
 
@@ -819,6 +809,89 @@ function exportArtFiles() {
 
     zip.generateAsync({ type: 'blob' }).then(content => {
         downloadBlob(content, "arts.zip", "application/octet-stream");
+    });
+
+}
+
+// export tiles pngs
+function exportTileFiles() {
+
+    const transparency = document.querySelector("input#enable-transparency").checked;
+    const shadeIndex = document.querySelector("input#shade-range").value;
+    const swapIndex = document.querySelector("select#swap-select").value || null;
+    const alternateIndex = document.querySelector("select#alternate-select").value || null;
+
+    // apply palette
+    let colors = alternateIndex ? Globals.Lookup.alternates[alternateIndex].colors : Globals.Palette.colors;
+    
+    // apply swap
+    if (Globals.Lookup && swapIndex !== null) {
+        colors = colors.map((c, i) => colors[Globals.Lookup.swaps[swapIndex].table[i]]);
+    }
+
+    // apply shade
+    colors = colors.map((c, i) => colors[Globals.Palette.shades[shadeIndex][i]]);
+    
+    // convert to [r,g,b,a] array
+    colors = colors.map((color, index) => {
+        if (transparency && index === 255) {
+            return [0,0,0,0];
+        } else {
+            return [...color, 255];
+        }
+    });
+
+    const zip = new JSZip();
+
+    for (const art of Globals.Arts) {
+        for (let t = 0; t < art.tiles.length; t++) {
+            const tile = art.tiles[t];
+            if (tile.length) {                
+                const width = tile.length;
+                const height = tile[0].length;        
+                const pixels = new Uint8Array((width * height)*4);        
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        const index = tile[x][y];
+                        const color = colors[index];
+                        const i = x + y * width;
+                        pixels[i*4+0] = color[0];
+                        pixels[i*4+1] = color[1];
+                        pixels[i*4+2] = color[2];
+                        pixels[i*4+3] = color[3];
+                    }
+                }        
+                const png8bytes = UPNG.encode([pixels.buffer], width, height, 256);
+                zip.file(`${art.localtilestart + t}.png`, png8bytes, { binary: true });
+            }
+        }
+    }
+
+    downloadBlob = function (data, fileName, mimeType) {
+        var blob, url;
+        blob = new Blob([data], {
+            type: mimeType
+        });
+        url = window.URL.createObjectURL(blob);
+        downloadURL(url, fileName);
+        setTimeout(function () {
+            return window.URL.revokeObjectURL(url);
+        }, 1000);
+    };
+
+    downloadURL = function (data, fileName) {
+        var a;
+        a = document.createElement("a");
+        a.href = data;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.style = "display: none";
+        a.click();
+        a.remove();
+    };
+
+    zip.generateAsync({ type: 'blob' }).then(content => {
+        downloadBlob(content, "tiles.zip", "application/octet-stream");
     });
 
 }

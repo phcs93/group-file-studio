@@ -11,7 +11,9 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">    
 
-        <script type="application/javascript" src="jszip.min.js"></script>
+        <script type="application/javascript" src="lib/jszip.js"></script>
+        <script type="application/javascript" src="lib/pako.js"></script>
+        <script type="application/javascript" src="lib/upng.js"></script>
         
         <script type="application/javascript" src="models/grp.js"></script>
         <script type="application/javascript" src="models/palette.js"></script>
@@ -112,6 +114,10 @@
             <span class="tip">current ART files will be replaced by corresponding uploaded ART file base on "localtilestart"</span>
             <br>
             <button onclick="exportArtFiles()">EXPORT MODIFIED ART FILES (.ZIP)</button>
+            <br>
+            <button onclick="exportTileFiles()">EXPORT TILES AS PNG (.ZIP)</button>
+            <br>
+            <span class="tip">tiles will be exported just as you see them in the grid (with or without transparency, with pallete swaps and alternative palettes, shades, etc)</span>
 
         </div>
 

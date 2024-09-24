@@ -10,6 +10,9 @@ function Art (bytes, name) {
     const int32 = () => b(0)|b(8)|b(16)|b(24);
     const int64 = () => b(0)|b(8)|b(16)|b(24)|b(32)|b(40)|b(48)|b(56);
 
+    const isolate = (v, s, e) => (v >> s) & (1 << e - s + 1) - 1;
+    const attach = (v, s, e, n) => (v & ~(((1 << (e - s + 1)) - 1) << s)) | ((n & ((1 << (e - s + 1)) - 1)) << s);
+
     this.version = int32();
     this.numtiles = int32();
     this.localtilestart = int32();
@@ -29,7 +32,15 @@ function Art (bytes, name) {
 
     this.picanm = new Array(this.tiles.length);    
     for (let i = 0; i < this.picanm.length; i++) {
-        this.picanm[i] = int32();
+        const picanm = int32();
+        this.picanm[i] = {
+            frames: isolate(picanm, 0, 5),
+            type: isolate(picanm, 6, 7),
+            offsetX: isolate(picanm, 8, 15),
+            offsetY: isolate(picanm, 16, 23),
+            speed: isolate(picanm, 24, 27),
+            unused: isolate(picanm, 28, 31)
+        };
     }
 
     // each tile will be represented as an array of arrays of bytes => [x][y] = palette index
@@ -69,7 +80,14 @@ function Art (bytes, name) {
         }        
 
         for (let i = 0; i < this.picanm.length; i++) {
-            byteArray.push(...int32ToBytes(this.picanm[i]));
+            let picanm = 0;
+            picanm = attach(picanm, 0, 5, this.picanm[i].frames);
+            picanm = attach(picanm, 6, 7, this.picanm[i].type);
+            picanm = attach(picanm, 8, 15, this.picanm[i].offsetX);
+            picanm = attach(picanm, 16, 23, this.picanm[i].offsetY);
+            picanm = attach(picanm, 24, 27, this.picanm[i].speed);
+            picanm = attach(picanm, 28, 31, this.picanm[i].unused);
+            byteArray.push(...int32ToBytes(picanm));
         }
 
         for (let i = 0; i < this.tiles.length; i++) {
@@ -88,4 +106,36 @@ function Art (bytes, name) {
 
     };
 
+}
+
+function definirBits1(picanm, bitInicial, bitFinal, novoValor) {
+    // Calcular o número de bits
+    var numBits = bitFinal - bitInicial + 1;
+
+    // Criar a máscara com a quantidade correta de bits
+    var mascara = (1 << numBits) - 1;
+
+    // Limpar a área onde vamos definir o novo valor
+    picanm &= ~(mascara << bitInicial);
+
+    // Definir o novo valor na posição correta
+    picanm |= (novoValor & mascara) << bitInicial;
+
+    return picanm;
+}
+
+function definirBits2(picanm, bitInicial, bitFinal, novoValor) {
+    // Calcular o número de bits
+    var numBits = bitFinal - bitInicial + 1;
+
+    // Criar a máscara com a quantidade correta de bits
+    var mascara = ((1 << numBits) - 1) << bitInicial;
+
+    // Limpar a área onde vamos definir o novo valor
+    picanm &= ~mascara;
+
+    // Colocar o novo valor na posição correta
+    picanm |= (novoValor << bitInicial) & mascara;
+
+    return picanm;
 }

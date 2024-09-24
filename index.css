@@ -244,6 +244,9 @@ div#tiles {
     margin-top: 16px;
     margin-left: calc(256px + 32px + 32px);
     margin-right: 16px;
+    &[data-background="true"] div.grid {
+        background-image: url(./transparency-background.png);
+    }
 }
 
 div.grid {    
@@ -252,9 +255,6 @@ div.grid {
     grid-template-rows: repeat(auto-fill, var(--grid-size));
     grid-auto-rows: var(--grid-size);
     grid-gap: 0px;
-    &[data-background="true"] {
-        background-image: url(./transparency-background.png);
-    }
 }
 
 canvas {
@@ -283,6 +283,10 @@ canvas {
     &.drag-over-right {
         border-right: 1px solid white;
         animation: blink-right 0.5s ease-in-out infinite;
+    }
+    &[data-animation="true"] {
+        border: 1px solid greenyellow;
+        animation: blink-green 0.5s ease-in-out infinite;
     }
 }
 
@@ -333,6 +337,12 @@ svg {
     0% { border-right-color: #000000; }
     50% { border-right-color: #FFFFFF; }
     100% { border-right-color: #000000; }
+}
+
+@keyframes blink-green {
+    0% { border-color: #000000; }
+    50% { border-color: greenyellow; }
+    100% { border-color: #000000; }
 }
 
 span.tip {
