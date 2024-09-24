@@ -703,7 +703,7 @@ function editTileOrder(fromIndex, toIndex, swap) {
     for (const artIndex in Globals.Arts) {
         const start = Globals.Arts[artIndex].localtilestart;
         const end = Globals.Arts[artIndex].localtileend;
-        for (let i = start; i < end; i++) {
+        for (let i = start; i <= end; i++) {
             Globals.Arts[artIndex].tiles[i - start] = tiles[i];
             Globals.Arts[artIndex].tilesizx[i - start] = tiles[i].length;
             Globals.Arts[artIndex].tilesizy[i - start] = tiles[i][0] ? tiles[i][0].length : 0;
