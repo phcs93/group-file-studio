@@ -11,6 +11,8 @@ https://phcs93.github.io/group-file-studio/
 - you can replace or edit the PALETTE.DAT file and export the modified file
 - you can replace or edit the LOOKUP.DAT file and export the modified file
 - you can reorder or replace tiles in an .ART file and export the modified file
+- you can export the tiles as you see them (with palette swaps, shade, transparency and alterantive palettes)
+    - the tiles will be exported as 8 bits .PNG files in a .ZIP
 
 # TO-DO
 
