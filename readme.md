@@ -18,8 +18,12 @@ https://phcs93.github.io/group-file-studio/
 
 - when non adjacent art files are loaded => it breaks the tile reordering and swaping feature
     - figure out how to correctly render the "gaps" => maybe create "empty" .ART files
+    - actually a more elegant solution would be to create empty entries when grouping the tiles internally and properly distribute them back based of their indexes considering the "localtilestart" and "localtileend" of each loaded .ART file
 
 # TO-DO
+
+- add ability to change .ART file "localtilestart" and "localtileend"
+    - show correct number of tiles in art file
 
 - improve the ux
     - ability to unload .art files
