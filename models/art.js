@@ -107,35 +107,3 @@ function Art (bytes, name) {
     };
 
 }
-
-function definirBits1(picanm, bitInicial, bitFinal, novoValor) {
-    // Calcular o número de bits
-    var numBits = bitFinal - bitInicial + 1;
-
-    // Criar a máscara com a quantidade correta de bits
-    var mascara = (1 << numBits) - 1;
-
-    // Limpar a área onde vamos definir o novo valor
-    picanm &= ~(mascara << bitInicial);
-
-    // Definir o novo valor na posição correta
-    picanm |= (novoValor & mascara) << bitInicial;
-
-    return picanm;
-}
-
-function definirBits2(picanm, bitInicial, bitFinal, novoValor) {
-    // Calcular o número de bits
-    var numBits = bitFinal - bitInicial + 1;
-
-    // Criar a máscara com a quantidade correta de bits
-    var mascara = ((1 << numBits) - 1) << bitInicial;
-
-    // Limpar a área onde vamos definir o novo valor
-    picanm &= ~mascara;
-
-    // Colocar o novo valor na posição correta
-    picanm |= (novoValor << bitInicial) & mascara;
-
-    return picanm;
-}

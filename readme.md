@@ -14,6 +14,11 @@ https://phcs93.github.io/group-file-studio/
 - you can export the tiles as you see them (with palette swaps, shade, transparency and alterantive palettes)
     - the tiles will be exported as 8 bits .PNG files in a .ZIP
 
+# BUG
+
+- when non adjacent art files are loaded => it breaks the tile reordering and swaping feature
+    - figure out how to correctly render the "gaps" => maybe create "empty" .ART files
+
 # TO-DO
 
 - improve the ux
