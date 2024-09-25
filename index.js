@@ -181,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // dag tile
     document.body.addEventListener("dragstart", e => {
         if (e.target.tagName.toLowerCase() === "canvas" && e.target.draggable) {
-            e.dataTransfer.setData("index", e.target.dataset.index);
+            e.dataTransfer.setData("order", e.target.dataset.order);
             e.dataTransfer.effectAllowed = "move";
         } else {
             e.preventDefault();
@@ -224,12 +224,12 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.addEventListener("drop", e => {
         if (e.target.tagName.toLowerCase() === "canvas" && e.target.draggable) {
             e.preventDefault();
-            const fromIndex = parseInt(e.dataTransfer.getData("index"));
+            const fromIndex = parseInt(e.dataTransfer.getData("order"));
             if (fromIndex || fromIndex === 0) {
                 e.target.classList.remove("drag-over-center");
                 e.target.classList.remove("drag-over-left");
                 e.target.classList.remove("drag-over-right");
-                let toIndex = parseInt(e.target.dataset.index);
+                let toIndex = parseInt(e.target.dataset["order"]);
                 let swap = false;
                 const position = e.offsetX / e.target.clientWidth;
                 if (position < 0.25) {
@@ -463,12 +463,14 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
 
     const startTime = new Date(); // for calculating performance
 
+    let order = 0; // only used for the reordering feature
+
     for (let a = 0; a < arts.length; a++) {
 
         const art = arts[a];
 
         const h1 = document.createElement("h1");
-        h1.innerHTML = `${art.name} [${art.localtilestart}-${art.localtileend}]`;
+        h1.innerHTML = `${art.name} [${art.localtilestart}-${art.localtileend}] <span class="numtiles">(${art.tiles.length} tiles)</span>`;
         main.appendChild(h1);
 
         main.insertAdjacentHTML("beforeend", `
@@ -484,8 +486,8 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
 
             const canvas = document.createElement("canvas");
             canvas.dataset.index = art.localtilestart + t;
-            canvas.dataset.artIndex = a; // this is only used for the edit tile
-            //canvas.setAttribute("download", `${art.name}-${t}.png`);
+            canvas.dataset.order = order++;
+            canvas.dataset.artIndex = a; // this is only used for the edit tile function
             canvas.setAttribute("draggable", "true");
 
             // tile = [x][y] = byte (palette color index)
@@ -682,13 +684,15 @@ function editTile (artIndex, tileIndex, pixels) {
 }
 
 // edit tile order
-function editTileOrder(fromIndex, toIndex, swap) {
+function editTileOrder(fromIndex, toIndex, swap) {   
 
     // group all tiles in a single array
-    const tiles = Globals.Arts.reduce((acc, crr) => { acc.push(...crr.tiles); return acc; }, []);
+    const tiles = Globals.Arts.reduce((tiles, art) => {  tiles.push(...art.tiles);  return tiles; }, []);
 
-    // move the tile
-    if (swap) {
+    // move the tile (based on internal ordering index, not display index)
+    // this is to make sure that tiles from non-adjacent art files are properly reordered
+    // the swapping doesn't really need to use the internal ordering index but we do anyway just to keep it simple
+    if (swap) {        
         const tile1 = tiles[fromIndex];
         const tile2 = tiles[toIndex];
         tiles[fromIndex] = tile2;
@@ -699,14 +703,17 @@ function editTileOrder(fromIndex, toIndex, swap) {
 
     // redistribute the files between the art files (based on localtilestart and localtileend)
     // update tilesizx and tilesizy as well
-    // yeah, picanm will be fucked for now
+    // yeah, picanm will be fucked for now    
+    let index = 0;
     for (const artIndex in Globals.Arts) {
         const start = Globals.Arts[artIndex].localtilestart;
         const end = Globals.Arts[artIndex].localtileend;
-        for (let i = start; i <= end; i++) {
-            Globals.Arts[artIndex].tiles[i - start] = tiles[i];
-            Globals.Arts[artIndex].tilesizx[i - start] = tiles[i].length;
-            Globals.Arts[artIndex].tilesizy[i - start] = tiles[i][0] ? tiles[i][0].length : 0;
+        const numtiles = end - start + 1;
+        for (let i = 0; i < numtiles; i++) {
+            const tile = tiles[index++];
+            Globals.Arts[artIndex].tiles[i] = tile;
+            Globals.Arts[artIndex].tilesizx[i] = tile.length;
+            Globals.Arts[artIndex].tilesizy[i] = tile[0] ? tile[0].length : 0;
         }
     }
 

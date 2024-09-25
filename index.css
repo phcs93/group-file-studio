@@ -357,6 +357,11 @@ span.tip {
     }
 }
 
+span.numtiles {
+    color: gray;
+    font-weight: 100;
+}
+
 label > span.tip {
     &::before {
         content: '';

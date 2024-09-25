@@ -14,25 +14,23 @@ https://phcs93.github.io/group-file-studio/
 - you can export the tiles as you see them (with palette swaps, shade, transparency and alterantive palettes)
     - the tiles will be exported as 8 bits .PNG files in a .ZIP
 
-# BUG
-
-- when non adjacent art files are loaded => it breaks the tile reordering and swaping feature
-    - figure out how to correctly render the "gaps" => maybe create "empty" .ART files
-    - actually a more elegant solution would be to create empty entries when grouping the tiles internally and properly distribute them back based of their indexes considering the "localtilestart" and "localtileend" of each loaded .ART file
-
 # TO-DO
 
+- ability to unload .ART files
+- ability to create new .ART files
 - add ability to change .ART file "localtilestart" and "localtileend"
-    - show correct number of tiles in art file
+    - what should happen if art size gets smaller? discard out of bounds tiles?
+        - maybe create a new art in between with the remaining tiles
+    - what should happen with overlaping art files?
+        - currently if you load an art file with overlaping localtilestart it just replaces it
+            - but this only takes into account the "localtilestart" and **assumes** that the "localtileend" will not overlap any current loaded art files
 
-- improve the ux
-    - ability to unload .art files
+- improve the ux    
     - disable upload lookup file button if no palette is loaded
     - disable upload art files button if no palette is loaded
+    - validate uploaded files (for example, check if the GRP is a valid GRP)
 
 - ability to edit art animations (because these will be messed by the tile reordering feature)
-
-- validate uploaded files (for example, check if the GRP is a valid GRP)
 
 - ability to upload/edit/export a tiles.cfg (for Mapster32 tile groups)
 
