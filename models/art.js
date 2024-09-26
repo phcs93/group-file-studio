@@ -30,16 +30,16 @@ function Art (bytes, name) {
         this.tilesizy[i] = int16();
     }
 
-    this.picanm = new Array(this.tiles.length);    
-    for (let i = 0; i < this.picanm.length; i++) {
-        const picanm = int32();
-        this.picanm[i] = {
-            frames: isolate(picanm, 0, 5),
-            type: isolate(picanm, 6, 7),
-            offsetX: isolate(picanm, 8, 15),
-            offsetY: isolate(picanm, 16, 23),
-            speed: isolate(picanm, 24, 27),
-            unused: isolate(picanm, 28, 31)
+    this.animations = new Array(this.tiles.length);    
+    for (let i = 0; i < this.animations.length; i++) {
+        const animation = int32();
+        this.animations[i] = {
+            frames: isolate(animation, 0, 5),
+            type: isolate(animation, 6, 7),
+            offsetX: isolate(animation, 8, 15),
+            offsetY: isolate(animation, 16, 23),
+            speed: isolate(animation, 24, 27),
+            unused: isolate(animation, 28, 31)
         };
     }
 
@@ -79,15 +79,15 @@ function Art (bytes, name) {
             byteArray.push(...int16ToBytes(this.tilesizy[i]));
         }        
 
-        for (let i = 0; i < this.picanm.length; i++) {
-            let picanm = 0;
-            picanm = attach(picanm, 0, 5, this.picanm[i].frames);
-            picanm = attach(picanm, 6, 7, this.picanm[i].type);
-            picanm = attach(picanm, 8, 15, this.picanm[i].offsetX);
-            picanm = attach(picanm, 16, 23, this.picanm[i].offsetY);
-            picanm = attach(picanm, 24, 27, this.picanm[i].speed);
-            picanm = attach(picanm, 28, 31, this.picanm[i].unused);
-            byteArray.push(...int32ToBytes(picanm));
+        for (let i = 0; i < this.animations.length; i++) {
+            let animation = 0;
+            animation = attach(animation, 0, 5, this.animations[i].frames);
+            animation = attach(animation, 6, 7, this.animations[i].type);
+            animation = attach(animation, 8, 15, this.animations[i].offsetX);
+            animation = attach(animation, 16, 23, this.animations[i].offsetY);
+            animation = attach(animation, 24, 27, this.animations[i].speed);
+            animation = attach(animation, 28, 31, this.animations[i].unused);
+            byteArray.push(...int32ToBytes(animation));
         }
 
         for (let i = 0; i < this.tiles.length; i++) {

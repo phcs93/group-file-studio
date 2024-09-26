@@ -44,8 +44,8 @@
             <hr>
             <br>
 
-            <label id="grid-size-label" data-gridsize="64">GRID SIZE</label>
-            <input type="range" id="grid-size-range" min="8" max="512" step="2" value="64">
+            <label id="grid-size-label" data-gridsize="128">GRID SIZE</label>
+            <input type="range" id="grid-size-range" min="8" max="512" step="2" value="128">
 
             <br>
             
@@ -112,6 +112,32 @@
             <br>
             <span class="tip">you can upload multiples files</span>
             <span class="tip">current ART files will be replaced by corresponding uploaded ART file base on "localtilestart"</span>
+            <br>
+            <canvas id="tile"></canvas>
+            <br>
+            <label>ANIMATION TYPE</label>
+            <select id="animation-type">
+                <option value="0">none</option>
+                <option value="1">oscillating</option>
+                <option value="2">forward</option>
+                <option value="3">backward</option>
+            </select>
+            <br>
+            <label>NUMBER OF FRAMES</label>
+            <input type="number" id="animation-frames" value="0" step="1" min="0">
+            <br>
+            <label>OFFSET X</label>
+            <input type="number" id="animation-offset-x" value="0" step="1">
+            <br>
+            <label>OFFSET Y</label>
+            <input type="number" id="animation-offset-y" value="0" step="1">
+            <br>
+            <label>SPEED</label>
+            <input type="number" id="animation-speed" value="0" step="1" min="0" max="15">
+            <br>
+            <canvas id="animation"></canvas>
+            <br>
+            <span class="tip">animation speed preview is only an aproximation of what it will look like in the game</span>
             <br>
             <button onclick="exportArtFiles()">EXPORT MODIFIED ART FILES (.ZIP)</button>
             <br>

@@ -3,10 +3,24 @@ Globals = {
     Pelette: null,
     Lookup: null,
     Arts: [],
-    SelectedPaletteColorIndex: null
+    Animation: {
+        Oscillating: false,
+        Canvas: null,
+        Index: 0,
+        Frames: [],
+        Type: 0,
+        Speed: 15,
+        Colors: null,
+        Transparency: null
+    },
+    SelectedPaletteColorIndex: null,
+    SelectedTileIndex: null
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+
+    Globals.Animation.Canvas = document.getElementById("animation");
+    requestAnimationFrame(renderAnimation);
 
     // upload GRP
     document.querySelector("input#grp-input").onchange = e => {
@@ -130,11 +144,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // change enable background
     document.querySelector("input#enable-background").onchange = e => {
         document.querySelector("div#tiles").dataset.background = e.target.checked;
+        document.querySelector("canvas#tile").dataset.background = e.target.checked;
+        document.querySelector("canvas#animation").dataset.background = e.target.checked;
     };
 
     // change tile (double click)
     document.body.addEventListener("dblclick", async e => {
-        if (e.target.tagName.toLowerCase() === "canvas" /*&& e.target.draggable*/) {
+        if (e.target.tagName.toLowerCase() === "canvas" && e.target.draggable) {
             const tileIndex = e.target.dataset.index;
             const artIndex = e.target.dataset.artIndex;
             const [file] = await showOpenFilePicker({
@@ -178,7 +194,68 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // dag tile
+    // select tile (click)
+    document.body.addEventListener("click", async e => {
+        if (e.target.tagName.toLowerCase() === "canvas" && e.target.draggable) {
+            document.querySelectorAll("canvas").forEach(canvas => {
+                canvas.dataset.selected = false;
+            });
+            if (e.target.dataset.index !== Globals.SelectedTileIndex) {
+                Globals.SelectedTileIndex = e.target.dataset.index;
+                e.target.dataset.selected = true;
+            } else {
+                Globals.SelectedTileIndex = null;
+            }
+            renderSelectedTile();
+        }
+    });
+
+    // change animation type
+    document.getElementById("animation-type").onchange = e => {
+        if (Globals.SelectedTileIndex) {
+            let artIndex = Globals.Arts.findIndex(a => Globals.SelectedTileIndex >= a.localtilestart && Globals.SelectedTileIndex <= a.localtileend);
+            Globals.Arts[artIndex].animations[Globals.SelectedTileIndex - Globals.Arts[artIndex].localtilestart].type = parseInt(e.target.value);
+            renderSelectedTile();
+        }
+    };
+
+    // change animation frames
+    document.getElementById("animation-frames").oninput = e => {
+        if (Globals.SelectedTileIndex) {
+            let artIndex = Globals.Arts.findIndex(a => Globals.SelectedTileIndex >= a.localtilestart && Globals.SelectedTileIndex <= a.localtileend);
+            Globals.Arts[artIndex].animations[Globals.SelectedTileIndex - Globals.Arts[artIndex].localtilestart].frames = parseInt(e.target.value) || 0;
+            renderSelectedTile();
+        }
+    };
+
+    // change animation offset x
+    document.getElementById("animation-offset-x").oninput = e => {
+        if (Globals.SelectedTileIndex) {
+            let artIndex = Globals.Arts.findIndex(a => Globals.SelectedTileIndex >= a.localtilestart && Globals.SelectedTileIndex <= a.localtileend);
+            Globals.Arts[artIndex].animations[Globals.SelectedTileIndex - Globals.Arts[artIndex].localtilestart].offsetX = parseInt(e.target.value) || 0;
+            renderSelectedTile();
+        }
+    };
+
+    // change animation offset y
+    document.getElementById("animation-offset-y").oninput = e => {
+        if (Globals.SelectedTileIndex) {
+            let artIndex = Globals.Arts.findIndex(a => Globals.SelectedTileIndex >= a.localtilestart && Globals.SelectedTileIndex <= a.localtileend);
+            Globals.Arts[artIndex].animations[Globals.SelectedTileIndex - Globals.Arts[artIndex].localtilestart].offsetY = parseInt(e.target.value) || 0;
+            renderSelectedTile();
+        }
+    };
+
+    // change animation speed
+    document.getElementById("animation-speed").oninput = e => {
+        if (Globals.SelectedTileIndex) {
+            let artIndex = Globals.Arts.findIndex(a => Globals.SelectedTileIndex >= a.localtilestart && Globals.SelectedTileIndex <= a.localtileend);
+            Globals.Arts[artIndex].animations[Globals.SelectedTileIndex - Globals.Arts[artIndex].localtilestart].speed = parseInt(e.target.value) || 0;
+            renderSelectedTile();
+        }
+    };
+
+    // drag tile
     document.body.addEventListener("dragstart", e => {
         if (e.target.tagName.toLowerCase() === "canvas" && e.target.draggable) {
             e.dataTransfer.setData("order", e.target.dataset.order);
@@ -274,6 +351,7 @@ function render() {
     document.querySelector("input#shade-range").value = shadeIndex;
     document.querySelector("select#swap-select").value = swapIndex || "";
     document.querySelector("select#alternate-select").value = alternateIndex || "";
+    renderSelectedTile();
 }
 
 // render palette
@@ -475,6 +553,7 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
 
         main.insertAdjacentHTML("beforeend", `
             <span class="tip">drag and drop to reorder or swap tiles</span>
+            <span class="tip">click to select tile and edit animation (bottom of side menu)</span>
             <span class="tip">double click to change tile</span>
             <br>
         `);
@@ -488,6 +567,7 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
             canvas.dataset.index = art.localtilestart + t;
             canvas.dataset.order = order++;
             canvas.dataset.artIndex = a; // this is only used for the edit tile function
+            canvas.dataset.selected = Globals.SelectedTileIndex === canvas.dataset.index;
             canvas.setAttribute("draggable", "true");
 
             // tile = [x][y] = byte (palette color index)
@@ -497,9 +577,6 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
 
                 canvas.dataset.width = tile.length;
                 canvas.dataset.height = tile[0].length;
-
-                //canvas.dataset.animation = art.picanm[t].frames > 0;
-                //canvas.dataset.animation = art.picanm[t].type === 3;
 
                 canvas.setAttribute("title", `#${art.localtilestart + t} [${tile.length}x${tile[0].length}]`);
                 canvas.width = tile.length;
@@ -538,6 +615,213 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
     const endTime = new Date();
     const timeDiff = endTime - startTime; // in ms
     console.log(`renderArts() took ${timeDiff}ms`);
+
+}
+
+// render selected tile
+function renderSelectedTile() {
+
+    const selectedTileIndex = Globals.SelectedTileIndex;
+
+    const canvas = document.getElementById("tile");
+    const context = canvas.getContext("2d");
+
+    if (selectedTileIndex) {
+
+        const transparency = document.querySelector("input#enable-transparency").checked;
+        const shadeIndex = document.querySelector("input#shade-range").value;
+        const swapIndex = document.querySelector("select#swap-select").value || null;
+        const alternateIndex = document.querySelector("select#alternate-select").value || null;
+        const palette = Globals.Palette;
+        const lookup = Globals.Lookup;
+
+        // apply alternate palette if any selected
+        let colors = alternateIndex ? lookup.alternates[alternateIndex].colors : palette.colors;
+        // apply swap if any selected
+        if (lookup && swapIndex !== null) {
+            colors = colors.map((c, i) => colors[lookup.swaps[swapIndex].table[i]]);
+        }
+        // apply shade
+        colors = colors.map((c, i) => colors[palette.shades[shadeIndex][i]]);
+
+        const tileToCanvas = (tile, canvas) => {
+
+            if (tile.length > 0) {
+
+                canvas.width = tile.length;
+                canvas.height = tile[0].length;
+
+                const data = context.createImageData(tile.length, tile[0].length);
+
+                // iterate the Y axis first because the tiles are stored in the opposite coordinate system than the screen memory is stored
+                for (let y = 0; y < tile[0].length; y++) {
+                    for (let x = 0; x < tile.length; x++) {
+                        const index = tile[x][y];
+                        const color = colors[index];
+                        const i = x + y * tile.length;
+                        data.data[i * 4 + 0] = color[0];
+                        data.data[i * 4 + 1] = color[1];
+                        data.data[i * 4 + 2] = color[2];
+                        data.data[i * 4 + 3] = transparency ? (index === 255 ? 0 : 255) : 255;
+                    }
+                }
+
+                context.putImageData(data, 0, 0);
+
+            } else {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+            }
+
+        };
+
+        let tileDictionary = Globals.Arts.reduce((dictionary, art) => {
+            for (let i = 0; i < art.tiles.length; i++) {
+                const tileIndex = art.localtilestart + i;
+                dictionary[tileIndex] = {
+                    tileIndex: tileIndex,
+                    tilePixels: art.tiles[i],
+                    animation: art.animations[i]
+                };
+            }
+            return dictionary;
+        }, {});
+
+        const tile = tileDictionary[selectedTileIndex];
+        const animation = tile.animation;
+        renderAnimationParameters(animation);
+
+        // render tile
+        tileToCanvas(tile.tilePixels, canvas);
+
+        // render animation // 1 = oscilating | 2 = forward | 3 = backward
+        if (animation.type > 0) {
+            const animationTiles = [];
+            const indexDictionary = Object.keys(tileDictionary).map(v => parseInt(v));
+            const orderIndexOfRoot = Object.keys(tileDictionary).findIndex(v => parseInt(v) === tile.tileIndex);
+            if (animation.type === 1 || animation.type === 2) {
+                for (let i = orderIndexOfRoot; i <= orderIndexOfRoot + animation.frames; i++) {
+                    animationTiles.push(tileDictionary[indexDictionary[i]]);
+                }
+            } else {
+                for (let i = orderIndexOfRoot; i >= orderIndexOfRoot - animation.frames; i--) {
+                    animationTiles.push(tileDictionary[indexDictionary[i]]);
+                }
+            }
+            Globals.Animation.Frames = animationTiles.map(t => t.tilePixels);
+            Globals.Animation.Colors = colors;
+            Globals.Animation.Transparency = transparency;
+            Globals.Animation.Speed = animation.speed;
+            Globals.Animation.Type = animation.type;
+        } else {
+            Globals.Animation.Frames = [];
+            Globals.Animation.Colors = null;
+            Globals.Animation.Transparency = null;
+            Globals.Animation.Speed = 15;
+            Globals.Animation.Type = 0;
+        }
+
+    } else {
+        renderAnimationParameters(null);
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        Globals.Animation.Frames = [];
+        Globals.Animation.Colors = null;
+        Globals.Animation.Transparency = null;
+        Globals.Animation.Speed = 15;
+        Globals.Animation.Type = 0;
+    }
+
+}
+
+// render animation parameters (type, frames, offset and speed)
+function renderAnimationParameters(animation) {
+
+    document.querySelector("select#animation-type").value = 0;
+    document.querySelector("input#animation-frames").value = 0;
+    document.querySelector("input#animation-offset-x").value = 0;
+    document.querySelector("input#animation-offset-y").value = 0;
+    document.querySelector("input#animation-speed").value = 0;
+
+    if (animation) {
+        document.querySelector("select#animation-type").value = animation.type;
+        document.querySelector("input#animation-frames").value = animation.frames;
+        document.querySelector("input#animation-offset-x").value = animation.offsetX;
+        document.querySelector("input#animation-offset-y").value = animation.offsetY;
+        document.querySelector("input#animation-speed").value = animation.speed;
+    }
+
+}
+
+// render animation (loop)
+function renderAnimation() {
+
+    const frames = Globals.Animation.Frames;
+    const colors = Globals.Animation.Colors;
+    const transparency = Globals.Animation.Transparency;
+    const canvas = Globals.Animation.Canvas;
+    const speed = Math.pow(Globals.Animation.Speed * 3, 2);
+    const type = Globals.Animation.Type;
+
+    const context = canvas.getContext("2d");
+
+    if (frames.length > 0) {
+
+        let tile = (() => {
+            switch (type) {
+                // oscilating
+                case 1: {
+                    if (Globals.Animation.Index <= 0) {
+                        Globals.Animation.Oscillating = false;
+                        Globals.Animation.Index = 0;
+                    } else if (Globals.Animation.Index >= frames.length - 1) {
+                        Globals.Animation.Oscillating = true;
+                        Globals.Animation.Index = frames.length - 1;
+                    }
+                    if (Globals.Animation.Oscillating) {
+                        Globals.Animation.Index--;
+                    } else {
+                        Globals.Animation.Index++;
+                    }
+                    return frames[Globals.Animation.Index];
+                }
+                // forward | backwards
+                case 2: case 3: {
+                    Globals.Animation.Index = (Globals.Animation.Index + 1) % frames.length;
+                    return frames[Globals.Animation.Index];
+                }
+            }
+        })();
+
+        if (tile.length > 0) {
+
+            canvas.width = tile.length;
+            canvas.height = tile[0].length;
+
+            const data = context.createImageData(tile.length, tile[0].length);
+
+            // iterate the Y axis first because the tiles are stored in the opposite coordinate system than the screen memory is stored
+            for (let y = 0; y < tile[0].length; y++) {
+                for (let x = 0; x < tile.length; x++) {
+                    const index = tile[x][y];
+                    const color = colors[index];
+                    const i = x + y * tile.length;
+                    data.data[i * 4 + 0] = color[0];
+                    data.data[i * 4 + 1] = color[1];
+                    data.data[i * 4 + 2] = color[2];
+                    data.data[i * 4 + 3] = transparency ? (index === 255 ? 0 : 255) : 255;
+                }
+            }
+
+            context.putImageData(data, 0, 0);
+
+        } else {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+    } else {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    setTimeout(() => requestAnimationFrame(renderAnimation), speed);
 
 }
 
@@ -636,7 +920,7 @@ function editLookupTable(swapIndex, colorIndex) {
 }
 
 // edit tile
-function editTile (artIndex, tileIndex, pixels) {
+function editTile(artIndex, tileIndex, pixels) {
 
     const findClosestColor = (color, colors) => {
         let closestColorIndex = null;
@@ -684,15 +968,15 @@ function editTile (artIndex, tileIndex, pixels) {
 }
 
 // edit tile order
-function editTileOrder(fromIndex, toIndex, swap) {   
+function editTileOrder(fromIndex, toIndex, swap) {
 
     // group all tiles in a single array
-    const tiles = Globals.Arts.reduce((tiles, art) => {  tiles.push(...art.tiles);  return tiles; }, []);
+    const tiles = Globals.Arts.reduce((tiles, art) => { tiles.push(...art.tiles); return tiles; }, []);
 
     // move the tile (based on internal ordering index, not display index)
     // this is to make sure that tiles from non-adjacent art files are properly reordered
     // the swapping doesn't really need to use the internal ordering index but we do anyway just to keep it simple
-    if (swap) {        
+    if (swap) {
         const tile1 = tiles[fromIndex];
         const tile2 = tiles[toIndex];
         tiles[fromIndex] = tile2;
@@ -703,7 +987,7 @@ function editTileOrder(fromIndex, toIndex, swap) {
 
     // redistribute the files between the art files (based on localtilestart and localtileend)
     // update tilesizx and tilesizy as well
-    // yeah, picanm will be fucked for now    
+    // yeah, animations will be fucked for now    
     let index = 0;
     for (const artIndex in Globals.Arts) {
         const start = Globals.Arts[artIndex].localtilestart;
@@ -830,7 +1114,7 @@ function exportTileFiles() {
 
     // apply palette
     let colors = alternateIndex ? Globals.Lookup.alternates[alternateIndex].colors : Globals.Palette.colors;
-    
+
     // apply swap
     if (Globals.Lookup && swapIndex !== null) {
         colors = colors.map((c, i) => colors[Globals.Lookup.swaps[swapIndex].table[i]]);
@@ -838,11 +1122,11 @@ function exportTileFiles() {
 
     // apply shade
     colors = colors.map((c, i) => colors[Globals.Palette.shades[shadeIndex][i]]);
-    
+
     // convert to [r,g,b,a] array
     colors = colors.map((color, index) => {
         if (transparency && index === 255) {
-            return [0,0,0,0];
+            return [0, 0, 0, 0];
         } else {
             return [...color, 255];
         }
@@ -853,21 +1137,21 @@ function exportTileFiles() {
     for (const art of Globals.Arts) {
         for (let t = 0; t < art.tiles.length; t++) {
             const tile = art.tiles[t];
-            if (tile.length) {                
+            if (tile.length) {
                 const width = tile.length;
-                const height = tile[0].length;        
-                const pixels = new Uint8Array((width * height)*4);        
+                const height = tile[0].length;
+                const pixels = new Uint8Array((width * height) * 4);
                 for (let y = 0; y < height; y++) {
                     for (let x = 0; x < width; x++) {
                         const index = tile[x][y];
                         const color = colors[index];
                         const i = x + y * width;
-                        pixels[i*4+0] = color[0];
-                        pixels[i*4+1] = color[1];
-                        pixels[i*4+2] = color[2];
-                        pixels[i*4+3] = color[3];
+                        pixels[i * 4 + 0] = color[0];
+                        pixels[i * 4 + 1] = color[1];
+                        pixels[i * 4 + 2] = color[2];
+                        pixels[i * 4 + 3] = color[3];
                     }
-                }        
+                }
                 const png8bytes = UPNG.encode([pixels.buffer], width, height, 256);
                 zip.file(`${art.localtilestart + t}.png`, png8bytes, { binary: true });
             }

@@ -1,5 +1,5 @@
 :root {
-    --grid-size: 64px;
+    --grid-size: 128px;
 }
 
 * {
@@ -156,7 +156,7 @@ hr {
     border-bottom: 1px solid #2B2B2B;
 }
 
-select {
+select, input[type="number"], input[type="text"] {
     font-family: "Segoe UI";
     font-size: 16px;
     height: 32px;
@@ -258,6 +258,11 @@ div.grid {
 }
 
 canvas {
+    object-fit: contain;
+    image-rendering: pixelated;
+}
+
+div#tiles canvas {
     border: 1px dotted #505050;
     box-sizing: border-box;    
     width: var(--grid-size);
@@ -284,9 +289,9 @@ canvas {
         border-right: 1px solid white;
         animation: blink-right 0.5s ease-in-out infinite;
     }
-    &[data-animation="true"] {
-        border: 1px solid greenyellow;
-        animation: blink-green 0.5s ease-in-out infinite;
+    &[data-selected="true"] {
+        border: 1px solid white;
+        animation: blink 0.5s ease-in-out infinite;
     }
 }
 
@@ -339,12 +344,6 @@ svg {
     100% { border-right-color: #000000; }
 }
 
-@keyframes blink-green {
-    0% { border-color: #000000; }
-    50% { border-color: greenyellow; }
-    100% { border-color: #000000; }
-}
-
 span.tip {
     color: gray !important; 
     font-weight: normal;
@@ -373,4 +372,18 @@ label > span.tip {
 
 h1 {
     margin-bottom: 0px;
+}
+
+canvas#tile,
+canvas#animation {
+    border: 1px solid white;
+    width: 256px;
+    height: 256px;
+}
+
+canvas#tile,
+canvas#animation {
+    &[data-background="true"] {
+        background-image: url(./transparency-background.png);
+    }
 }
