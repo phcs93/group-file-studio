@@ -479,7 +479,15 @@ function renderAlternateOptions(lookup) {
     if (lookup) {
         const defaultOption = `<option value="">none</option>`;
         const options = lookup.alternates.map((alternate, i) => `
-            <option value="${i}">${alternate.name}</option>
+            <option value="${i}">${ (() => {switch (i) {
+                case 0: return "underwater";
+                case 1: return "night vision / underslime";
+                case 2: return "3d realms logo";
+                case 3: return "title screen";
+                case 4: return "episode 1 ending";
+                //case 5: return "temporary slot for .anm files";
+                default: return `alternative palette ${i+1}`
+            }})()}</option>
         `);
         document.querySelector("select#alternate-select").innerHTML = [defaultOption].concat(options).join("");
     }
@@ -497,7 +505,7 @@ function renderAlternate(palette, lookup, alternateIndex) {
 
         const size = Math.sqrt(palette.colors.length);
 
-        const colors = alternateIndex ? lookup.alternates[alternateIndex].colors : palette.colors;
+        const colors = alternateIndex ? lookup.alternates[alternateIndex] : palette.colors;
 
         for (let x = 0; x < size; x++) {
             for (let y = 0; y < size; y++) {
@@ -529,7 +537,7 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
     main.innerHTML = "";
 
     // apply alternate palette if any selected
-    let colors = alternateIndex ? lookup.alternates[alternateIndex].colors : palette.colors;
+    let colors = alternateIndex ? lookup.alternates[alternateIndex] : palette.colors;
 
     // apply swap if any selected
     if (lookup && swapIndex !== null) {
@@ -636,7 +644,7 @@ function renderSelectedTile() {
         const lookup = Globals.Lookup;
 
         // apply alternate palette if any selected
-        let colors = alternateIndex ? lookup.alternates[alternateIndex].colors : palette.colors;
+        let colors = alternateIndex ? lookup.alternates[alternateIndex] : palette.colors;
         // apply swap if any selected
         if (lookup && swapIndex !== null) {
             colors = colors.map((c, i) => colors[lookup.swaps[swapIndex].table[i]]);
@@ -870,7 +878,7 @@ function editAlternateTable(alternateIndex, colorIndex) {
 
     if (alternateIndex !== null) {
 
-        const currentColor = Globals.Lookup.alternates[alternateIndex].colors[colorIndex];
+        const currentColor = Globals.Lookup.alternates[alternateIndex][colorIndex];
 
         const colorPicker = document.createElement("input");
 
@@ -888,7 +896,7 @@ function editAlternateTable(alternateIndex, colorIndex) {
         colorPicker.style.height = "0px";
 
         colorPicker.onchange = e => {
-            Globals.Lookup.alternates[alternateIndex].colors[colorIndex] = e.target.value.slice(1).match(/.{1,2}/g).map(c => parseInt(c, 16));
+            Globals.Lookup.alternates[alternateIndex][colorIndex] = e.target.value.slice(1).match(/.{1,2}/g).map(c => parseInt(c, 16));
             render();
         };
         colorPicker.onblur = e => {
@@ -1005,6 +1013,44 @@ function editTileOrder(fromIndex, toIndex, swap) {
 
 }
 
+// new shade
+function newShade () {
+    const shadeIndex = document.querySelector("input#shade-range").value;
+    const baseShade = Globals.Palette.shades[shadeIndex];
+    Globals.Palette.shades.push(baseShade);
+    renderShadeOptions(Globals.Palette);
+    document.querySelector("label#shade-label").dataset.shade = Globals.Palette.shades.length - 1;
+    document.querySelector("input#shade-range").value = Globals.Palette.shades.length - 1;
+    render();
+}
+
+// new swap
+function newSwap () {
+    if (Globals.Lookup) {
+        const swapIndex = document.querySelector("select#swap-select").value || null;
+        const baseSwap = { 
+            index: Globals.Lookup.swaps.length + 1, 
+            table: swapIndex ? Globals.Lookup.swaps[swapIndex].table : new Array(256).map((v, i) => i)
+        };
+        Globals.Lookup.swaps.push(baseSwap);
+        renderSwapOptions(Globals.Lookup);
+        document.querySelector("select#swap-select").value = Globals.Lookup.swaps.length - 1;
+        render();
+    }
+}
+
+// new alternate
+function newAlternate () {
+    if (Globals.Lookup) {
+        const alternateIndex = document.querySelector("select#alternate-select").value || null;
+        const baseAlternate = alternateIndex ? Globals.Lookup.alternates[alternateIndex] : Globals.Palette.colors;
+        Globals.Lookup.alternates.push(baseAlternate);
+        renderAlternateOptions(Globals.Lookup);
+        document.querySelector("select#alternate-select").value = Globals.Lookup.alternates.length - 1;
+        render();
+    }
+}
+
 // export palette.dat
 function exportPaletteFile() {
 
@@ -1113,7 +1159,7 @@ function exportTileFiles() {
     const alternateIndex = document.querySelector("select#alternate-select").value || null;
 
     // apply palette
-    let colors = alternateIndex ? Globals.Lookup.alternates[alternateIndex].colors : Globals.Palette.colors;
+    let colors = alternateIndex ? Globals.Lookup.alternates[alternateIndex] : Globals.Palette.colors;
 
     // apply swap
     if (Globals.Lookup && swapIndex !== null) {

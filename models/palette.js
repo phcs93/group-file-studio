@@ -6,25 +6,31 @@ function Palette (bytes) {
     let index = 0; 
 
     const b = (n) => bytes[index++] << n;
+    
     const byte = () => b(0);
     const int16 = () => b(0)|b(8);
     const int32 = () => b(0)|b(8)|b(16)|b(24);
     const int64 = () => b(0)|b(8)|b(16)|b(24)|b(32)|b(40)|b(48)|b(56);
 
+    const ubyte = () => byte() & 0xFF;
+    const uint16 = () => int16() & 0xFFFF;
+    const uint32 = () => int32() & 0xFFFFFFFF;
+    const uint64 = () => int64() & 0xFFFFFFFFFFFFFFFF;
+
     this.colors = new Array(256);
 
     for (let i = 0; i < this.colors.length; i++) {
         // scale from 0...64 to 0...256 (DOS was limited)
-        const r = lerp(0, 255, byte() / 64);
-        const g = lerp(0, 255, byte() / 64);
-        const b = lerp(0, 255, byte() / 64);
+        const r = lerp(0, 255, ubyte() / 64);
+        const g = lerp(0, 255, ubyte() / 64);
+        const b = lerp(0, 255, ubyte() / 64);
         this.colors[i] = [r, g, b];
     }
 
-    this.shades = new Array(int16());
+    this.shades = new Array(uint16());
 
     for (let i = 0; i < this.shades.length; i++) {
-        this.shades[i] = new Array(256).fill(0).map(() => byte());
+        this.shades[i] = new Array(256).fill(0).map(() => ubyte());
     }
 
     // this.transparency = new Array(256).fill(new Array(256));

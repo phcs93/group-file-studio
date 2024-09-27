@@ -5,10 +5,16 @@ function Art (bytes, name) {
     let index = 0; 
 
     const b = (n) => bytes[index++] << n;
+    
     const byte = () => b(0);
     const int16 = () => b(0)|b(8);
     const int32 = () => b(0)|b(8)|b(16)|b(24);
     const int64 = () => b(0)|b(8)|b(16)|b(24)|b(32)|b(40)|b(48)|b(56);
+
+    const ubyte = () => byte() & 0xFF;
+    const uint16 = () => int16() & 0xFFFF;
+    const uint32 = () => int32() & 0xFFFFFFFF;
+    const uint64 = () => int64() & 0xFFFFFFFFFFFFFFFF;
 
     const isolate = (v, s, e) => (v >> s) & (1 << e - s + 1) - 1;
     const attach = (v, s, e, n) => (v & ~(((1 << (e - s + 1)) - 1) << s)) | ((n & ((1 << (e - s + 1)) - 1)) << s);
@@ -34,12 +40,12 @@ function Art (bytes, name) {
     for (let i = 0; i < this.animations.length; i++) {
         const animation = int32();
         this.animations[i] = {
-            frames: isolate(animation, 0, 5),
-            type: isolate(animation, 6, 7),
-            offsetX: isolate(animation, 8, 15),
-            offsetY: isolate(animation, 16, 23),
-            speed: isolate(animation, 24, 27),
-            unused: isolate(animation, 28, 31)
+            frames: isolate(animation, 0, 5) & 0x3F, // uint6
+            type: isolate(animation, 6, 7), // int2
+            offsetX: isolate(animation, 8, 15), // int8
+            offsetY: isolate(animation, 16, 23), // int8
+            speed: isolate(animation, 24, 27) & 0x0F, // uint4
+            unused: isolate(animation, 28, 31) // int4
         };
     }
 

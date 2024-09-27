@@ -9,7 +9,11 @@ https://phcs93.github.io/group-file-studio/
 
 - you can load a .grp file and see all its contents
 - you can replace or edit the PALETTE.DAT file and export the modified file
+    - you can edit the default palette
+    - you can edit shades and create new ones
 - you can replace or edit the LOOKUP.DAT file and export the modified file
+    - you can edit the swaps and create new ones
+    - you can edit the alternate palettes and create new ones
 - you can reorder or replace tiles in an .ART file and export the modified file
     - the imported tiles will be converted to 8 bits colors using the loaded palette
 - you can export the tiles as you see them (with palette swaps, shade, transparency and alterantive palettes)
@@ -20,8 +24,6 @@ https://phcs93.github.io/group-file-studio/
 # TO-DO (now)
 
 - figure out a way to correctly show the animation offsets
-- add ability to add/remove shades
-- add ability to add/remove palette swaps
 - add ability to remove .ART files
 
 - improve the ux    

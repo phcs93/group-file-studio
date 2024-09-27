@@ -74,6 +74,8 @@
             <label id="shade-label" data-shade="0">SHADE</label>
             <input type="range" id="shade-range" min="0" max="0" step="1">
             <br>
+            <button onclick="newShade()">NEW SHADE BASED ON CURRENT</button>
+            <br>
             <span class="tip">(click to set color to selected brush)</span>
             <br>            
             <svg id="shade-svg"></svg>
@@ -90,12 +92,16 @@
             <label>PALETTE SWAP NUMBER</label>
             <select id="swap-select"></select>
             <br>
+            <button onclick="newSwap()">NEW SWAP BASED ON CURRENT</button>
+            <br>
             <span class="tip">(click to set color to selected brush)</span>
             <br>
             <svg id="lookup-svg"></svg>
             <br>
             <label>ALTERNATIVE GLOBAL PALETTE</label>
             <select id="alternate-select"></select>
+            <br>
+            <button onclick="newAlternate()">NEW ALT BASED ON CURRENT</button>
             <br>
             <span class="tip">(double click to edit color)</span>
             <br>    
