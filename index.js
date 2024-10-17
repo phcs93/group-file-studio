@@ -562,7 +562,7 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
         main.insertAdjacentHTML("beforeend", `
             <span class="tip">drag and drop to reorder or swap tiles</span>
             <span class="tip">click to select tile and edit animation (bottom of side menu)</span>
-            <span class="tip">double click to change tile</span>
+            <span class="tip">double click on a tile to upload an image</span>
             <br>
         `);
 
