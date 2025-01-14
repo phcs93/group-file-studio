@@ -6,44 +6,42 @@ function Art (bytes, name) {
 
     const b = (n) => bytes[index++] << n;
     
-    const byte = () => b(0);
+    const byte = () => (b(0) << 24) >> 24;
     const int16 = () => b(0)|b(8);
     const int32 = () => b(0)|b(8)|b(16)|b(24);
-    const int64 = () => b(0)|b(8)|b(16)|b(24)|b(32)|b(40)|b(48)|b(56);
 
     const ubyte = () => byte() & 0xFF;
     const uint16 = () => int16() & 0xFFFF;
     const uint32 = () => int32() & 0xFFFFFFFF;
-    const uint64 = () => int64() & 0xFFFFFFFFFFFFFFFF;
 
     const isolate = (v, s, e) => (v >> s) & (1 << e - s + 1) - 1;
     const attach = (v, s, e, n) => (v & ~(((1 << (e - s + 1)) - 1) << s)) | ((n & ((1 << (e - s + 1)) - 1)) << s);
 
-    this.version = int32();
-    this.numtiles = int32();
-    this.localtilestart = int32();
-    this.localtileend = int32();
+    this.version = uint32();
+    this.numtiles = uint32();
+    this.localtilestart = uint32();
+    this.localtileend = uint32();
 
     this.tiles = new Array(this.localtileend - this.localtilestart + 1);
 
     this.tilesizx = new Array(this.tiles.length);
     for (let i = 0; i < this.tilesizx.length; i++) {
-        this.tilesizx[i] = int16();
+        this.tilesizx[i] = uint16();
     }
 
     this.tilesizy = new Array(this.tiles.length);    
     for (let i = 0; i < this.tilesizy.length; i++) {
-        this.tilesizy[i] = int16();
+        this.tilesizy[i] = uint16();
     }
 
     this.animations = new Array(this.tiles.length);    
     for (let i = 0; i < this.animations.length; i++) {
-        const animation = int32();
+        const animation = uint32();
         this.animations[i] = {
             frames: isolate(animation, 0, 5) & 0x3F, // uint6
             type: isolate(animation, 6, 7), // int2
-            offsetX: isolate(animation, 8, 15), // int8
-            offsetY: isolate(animation, 16, 23), // int8
+            offsetX: (isolate(animation, 8, 15) << 24) >> 24, // int8
+            offsetY: (isolate(animation, 16, 23) << 24) >> 24, // int8
             speed: isolate(animation, 24, 27) & 0x0F, // uint4
             unused: isolate(animation, 28, 31) // int4
         };
@@ -55,7 +53,7 @@ function Art (bytes, name) {
         for (let x = 0; x < this.tilesizx[i] ; x++) {
             this.tiles[i][x] = [];
             for (let y = 0; y < this.tilesizy[i]; y++) {
-                this.tiles[i][x][y] = byte();
+                this.tiles[i][x][y] = ubyte();
             }
         }
     }

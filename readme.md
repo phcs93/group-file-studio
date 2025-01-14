@@ -23,6 +23,8 @@ https://phcs93.github.io/group-file-studio/
 
 # TO-DO (now)
 
+- enable "outline" mode
+- create new swap based on current for "none" => use base palette
 - figure out a way to correctly show the animation offsets
 - add ability to remove .ART files
 

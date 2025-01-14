@@ -7,15 +7,13 @@ function Lookup (bytes) {
 
     const b = (n) => bytes[index++] << n;
     
-    const byte = () => b(0);
+    const byte = () => (b(0) << 24) >> 24;
     const int16 = () => b(0)|b(8);
     const int32 = () => b(0)|b(8)|b(16)|b(24);
-    const int64 = () => b(0)|b(8)|b(16)|b(24)|b(32)|b(40)|b(48)|b(56);
 
     const ubyte = () => byte() & 0xFF;
     const uint16 = () => int16() & 0xFFFF;
     const uint32 = () => int32() & 0xFFFFFFFF;
-    const uint64 = () => int64() & 0xFFFFFFFFFFFFFFFF;
 
     this.swaps = new Array(ubyte());
 

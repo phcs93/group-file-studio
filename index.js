@@ -377,8 +377,8 @@ function renderPalette(palette) {
                 y="${y * 16}" 
                 width="16px" 
                 height="16px" 
-                fill="rgb(${color[0]},${color[1]},${color[2]})" 
-            />`;
+                fill="rgb(${color[0]},${color[1]},${color[2]})"
+            ><title>${index}</title></rect>`;
             elements.push(rect);
         }
     }
@@ -408,7 +408,8 @@ function renderShade(palette, shadeIndex) {
     for (let x = 0; x < size; x++) {
         for (let y = 0; y < size; y++) {
             const index = x + y * size;
-            const color = palette.colors[palette.shades[shadeIndex][index]];
+            const colorIndex = palette.shades[shadeIndex][index];
+            const color = palette.colors[colorIndex];
             const rect = `<rect 
                 onclick="editShadeTable(${shadeIndex}, ${index})" 
                 x="${x * 16}" 
@@ -416,7 +417,7 @@ function renderShade(palette, shadeIndex) {
                 width="16px" 
                 height="16px" 
                 fill="rgb(${color[0]},${color[1]},${color[2]})" 
-            />`;
+            ><title>${colorIndex}</title></rect>`;
             elements.push(rect);
         }
     }
@@ -462,7 +463,7 @@ function renderLookup(palette, lookup, swapIndex) {
                     width="16px" 
                     height="16px" 
                     fill="rgb(${color[0]},${color[1]},${color[2]})" 
-                />`;
+                ><title>${colorIndex}</title></rect>`;
                 elements.push(rect);
             }
         }
@@ -518,7 +519,7 @@ function renderAlternate(palette, lookup, alternateIndex) {
                     width="16px" 
                     height="16px" 
                     fill="rgb(${color[0]},${color[1]},${color[2]})" 
-                />`;
+                ><title>${index}</title></rect>`;
                 elements.push(rect);
             }
         }
@@ -579,9 +580,16 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
             canvas.setAttribute("draggable", "true");
 
             // tile = [x][y] = byte (palette color index)
-            const tile = art.tiles[t];
+            let tile = art.tiles[t];
 
             if (tile.length > 0) {
+
+                if (isPlayerSprite(art.localtilestart + t)) {
+                    tile = contourTile(tile);
+                    Globals.Arts[a].tiles[t] = tile;
+                    Globals.Arts[a].tilesizx[t] = tile.length;
+                    Globals.Arts[a].tilesizy[t] = tile[0].length;
+                }
 
                 canvas.dataset.width = tile.length;
                 canvas.dataset.height = tile[0].length;
@@ -1030,7 +1038,8 @@ function newSwap () {
         const swapIndex = document.querySelector("select#swap-select").value || null;
         const baseSwap = { 
             index: Globals.Lookup.swaps.length + 1, 
-            table: swapIndex ? Globals.Lookup.swaps[swapIndex].table : new Array(256).map((v, i) => i)
+            //table: swapIndex ? Globals.Lookup.swaps[swapIndex].table : new Array(256).map((v, i) => i)
+            table: new Array(256).fill(255)
         };
         Globals.Lookup.swaps.push(baseSwap);
         renderSwapOptions(Globals.Lookup);
@@ -1117,6 +1126,46 @@ function exportLookupFile() {
 
 // export .art files
 function exportArtFiles() {
+
+    // const dictionary = {};
+
+    // let count = 0;
+
+    // const a = Globals.Arts[0];
+    // a.name = "TILES024.ART";
+
+    // for (let i = 1; i < a.tiles.length; i++) {
+    //     a.tiles[i] = [];
+    //     a.tilesizx[i] = 0;
+    //     a.tilesizy[i] = 0;
+    //     a.animations[i] = {
+    //         frames: 0,
+    //         type: 0,
+    //         offsetX: 0,
+    //         offsetY: 0,
+    //         speed: 0,
+    //         unused: 0
+    //     };
+    // }
+
+    // a.localtilestart = 6144;
+    // a.localtileend = a.localtilestart + a.numtiles - 1;
+
+    // for (const art of Globals.Arts) {
+    //     for (let i = 1; i < art.tiles.length; i++) {
+    //         const picnum = art.localtilestart + i;
+    //         if (isPlayerSprite(picnum)) {
+    //             dictionary[picnum] = a.localtilestart + count;
+    //             a.tiles[count] = art.tiles[i];
+    //             a.tilesizx[count] = art.tilesizx[i];
+    //             a.tilesizy[count] = art.tilesizy[i];
+    //             a.animations[count] = art.animations[i];
+    //             count++;
+    //         }
+    //     }
+    // }
+
+    // console.log(dictionary);
 
     const zip = new JSZip();
 
@@ -1232,3 +1281,63 @@ function exportTileFiles() {
     });
 
 }
+
+// try to add contour
+function contourTile(tile) {
+
+    return tile;
+
+    // 1 pixel margin for proper contour coverage
+    tile = [new Array(tile[0].length).fill(255), ...tile, new Array(tile[0].length).fill(255)];
+    for (let i = 0; i < tile.length; i++) {
+        tile[i] = [255, ...tile[i], 255];
+    }
+
+    // brightest blue color possible for propper team color swapping
+    const edgeColorIndex = 79;
+
+    // detect edges
+    for (let x = 0; x < tile.length; x++) {
+        for (let y = 0; y < tile[x].length; y++) {
+            // if current pixel is transparent
+            if (tile[x][y] === 255) {
+                // if any adjacent pixel is not transparent
+                if (
+                    (tile[x-1] && tile[x-1][y-1] !== undefined && (tile[x-1][y-1] !== 255 && tile[x-1][y-1] !== edgeColorIndex)) ||
+                    (tile[x] && tile[x][y-1] !== undefined && (tile[x][y-1] !== 255 && tile[x][y-1] !== edgeColorIndex)) ||
+                    (tile[x+1] && tile[x+1][y-1] !== undefined && (tile[x+1][y-1] !== 255 && tile[x+1][y-1] !== edgeColorIndex)) ||
+                    (tile[x-1] && tile[x-1][y] !== undefined && (tile[x-1][y] !== 255 && tile[x-1][y] !== edgeColorIndex)) ||
+                    (tile[x+1] && tile[x+1][y] !== undefined && (tile[x+1][y] !== 255 && tile[x+1][y] !== edgeColorIndex)) ||
+                    (tile[x-1] && tile[x-1][y+1] !== undefined && (tile[x-1][y+1] !== 255 && tile[x-1][y+1] !== edgeColorIndex)) ||
+                    (tile[x] && tile[x][y+1] !== undefined && (tile[x][y+1] !== 255 && tile[x][y+1] !== edgeColorIndex)) ||
+                    (tile[x+1] && tile[x+1][y+1] !== undefined && (tile[x+1][y+1] !== 255 && tile[x+1][y+1] !== edgeColorIndex) )
+                ) {
+                    tile[x][y] = edgeColorIndex;
+                }
+            }
+        }    
+    }
+
+    // remove every pixel that is not the countour
+    for (let x = 0; x < tile.length; x++) {
+        for (let y = 0; y < tile[x].length; y++) {
+            // if current pixel is transparent
+            if (tile[x][y] !== 255 && tile[x][y] !== edgeColorIndex) {                
+                tile[x][y] = 255;
+            }
+        }    
+    }
+
+    return tile;
+
+}
+
+const isPlayerSprite = picnum => (
+    (picnum >= 1400 && picnum <= 1403) ||
+    (picnum >= 1405 && picnum <= 1409) ||
+    (picnum >= 1420 && picnum <= 1469) ||
+    (picnum >= 1491 && picnum <= 1505) ||
+    (picnum >= 1511 && picnum <= 1515) ||
+    picnum == 1518 ||
+    (picnum >= 1780 && picnum <= 1799)
+);
