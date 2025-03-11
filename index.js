@@ -1038,7 +1038,7 @@ function newSwap () {
         const swapIndex = document.querySelector("select#swap-select").value || null;
         const baseSwap = { 
             index: Globals.Lookup.swaps.length + 1, 
-            table: swapIndex ? Globals.Lookup.swaps[swapIndex].table : new Array(256).fill(0).map((v, i) => i)
+            table: swapIndex ? Object.assign({}, Globals.Lookup.swaps[swapIndex].table) : new Array(256).fill(0).map((v, i) => i)
             //table: new Array(256).fill(255)
         };
         Globals.Lookup.swaps.push(baseSwap);
