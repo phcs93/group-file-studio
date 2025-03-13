@@ -856,7 +856,7 @@ function selectPaletteColorIndex(event, element, colorIndex) {
     const shift = event.shiftKey;
 
     // if nothing was selected yet
-    if (!Globals.SelectedPaletteColorStartIndex) {
+    if (Globals.SelectedPaletteColorStartIndex === null) {
         Globals.SelectedPaletteColorStartIndex = colorIndex;
     } else {
 
