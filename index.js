@@ -13,7 +13,8 @@ Globals = {
         Colors: null,
         Transparency: null
     },
-    SelectedPaletteColorIndex: null,
+    SelectedPaletteColorStartIndex: null,
+    SelectedPaletteColorEndIndex: null,
     SelectedTileIndex: null
 };
 
@@ -335,7 +336,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // render everything
-function render() {
+function render(options) {
     const transparency = document.querySelector("input#enable-transparency").checked;
     const shadeIndex = document.querySelector("input#shade-range").value;
     const swapIndex = document.querySelector("select#swap-select").value || null;
@@ -347,7 +348,7 @@ function render() {
     renderLookup(Globals.Palette, Globals.Lookup, swapIndex);
     renderAlternateOptions(Globals.Lookup);
     renderAlternate(Globals.Palette, Globals.Lookup, alternateIndex);
-    renderArts(Globals.Palette, shadeIndex, Globals.Lookup, swapIndex, alternateIndex, Globals.Arts, transparency);
+    if (!options || !options.skipRenderTiles) renderArts(Globals.Palette, shadeIndex, Globals.Lookup, swapIndex, alternateIndex, Globals.Arts, transparency);
     document.querySelector("input#shade-range").value = shadeIndex;
     document.querySelector("select#swap-select").value = swapIndex || "";
     document.querySelector("select#alternate-select").value = alternateIndex || "";
@@ -369,8 +370,10 @@ function renderPalette(palette) {
         for (let y = 0; y < size; y++) {
             const index = x + y * size;
             const color = palette.colors[index];
+            const isRange = !!Globals.SelectedPaletteColorEndIndex;
+            const selected = !isRange ? index === Globals.SelectedPaletteColorStartIndex : index >= Globals.SelectedPaletteColorStartIndex && index <= Globals.SelectedPaletteColorEndIndex;
             const rect = `<rect 
-                data-selected="${Globals.SelectedPaletteColorIndex === index}" 
+                data-selected="${selected}" 
                 onclick="selectPaletteColorIndex(event, this, ${index})" 
                 ondblclick="editPaletteTable(${index}, event)" 
                 x="${x * 16}" 
@@ -849,10 +852,29 @@ function renderAnimation() {
 
 // select palette color
 function selectPaletteColorIndex(event, element, colorIndex) {
-    console.log(event);
-    document.querySelectorAll("svg#palette-svg rect").forEach(e => e.dataset.selected = false);
-    element.dataset.selected = true;
-    Globals.SelectedPaletteColorIndex = colorIndex;
+
+    const shift = event.shiftKey;
+
+    // if nothing was selected yet
+    if (!Globals.SelectedPaletteColorStartIndex) {
+        Globals.SelectedPaletteColorStartIndex = colorIndex;
+    } else {
+
+        // user is not holding shift => just update the start index and clear end index
+        if (!shift) {
+            Globals.SelectedPaletteColorStartIndex = colorIndex;
+            Globals.SelectedPaletteColorEndIndex = null;
+        } else {
+            // user is holding shift and clicked on a greater index => update end index
+            if (colorIndex > Globals.SelectedPaletteColorStartIndex) {
+                Globals.SelectedPaletteColorEndIndex = colorIndex;
+            }         
+        }
+
+    }
+
+    // call render palette to update selection animation
+    renderPalette(Globals.Palette);
 }
 
 // edit palette table
@@ -928,16 +950,28 @@ function editAlternateTable(alternateIndex, colorIndex) {
 
 // edit shade table
 function editShadeTable(shadeIndex, colorIndex) {
-    if (Globals.SelectedPaletteColorIndex) {
-        Globals.Palette.shades[shadeIndex][colorIndex] = Globals.SelectedPaletteColorIndex;
+    if (Globals.SelectedPaletteColorStartIndex) {
+        const end = Globals.SelectedPaletteColorEndIndex ?? Globals.SelectedPaletteColorStartIndex;
+        let c = 0;
+        for (let i = Globals.SelectedPaletteColorStartIndex; i <= end; i++) {
+            if (colorIndex + c <= 255) {
+                Globals.Palette.shades[shadeIndex][colorIndex+c++] = i;
+            }
+        }        
         render();
     }
 }
 
 // edit lookup table
 function editLookupTable(swapIndex, colorIndex) {
-    if (Globals.SelectedPaletteColorIndex && swapIndex !== null) {
-        Globals.Lookup.swaps[swapIndex].table[colorIndex] = Globals.SelectedPaletteColorIndex;
+    if (Globals.SelectedPaletteColorStartIndex && swapIndex !== null) {
+        const end = Globals.SelectedPaletteColorEndIndex ?? Globals.SelectedPaletteColorStartIndex;
+        let c = 0;
+        for (let i = Globals.SelectedPaletteColorStartIndex; i <= end; i++) {
+            if (colorIndex + c <= 255) {
+                Globals.Lookup.swaps[swapIndex].table[colorIndex+c++] = i;
+            }
+        }        
         render();
     }
 }
