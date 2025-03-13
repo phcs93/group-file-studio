@@ -371,7 +371,7 @@ function renderPalette(palette) {
             const color = palette.colors[index];
             const rect = `<rect 
                 data-selected="${Globals.SelectedPaletteColorIndex === index}" 
-                onclick="selectPaletteColorIndex(this, ${index})" 
+                onclick="selectPaletteColorIndex(event, this, ${index})" 
                 ondblclick="editPaletteTable(${index}, event)" 
                 x="${x * 16}" 
                 y="${y * 16}" 
@@ -639,8 +639,8 @@ function renderSelectedTile() {
 
     const selectedTileIndex = Globals.SelectedTileIndex;
 
-    const canvas = document.getElementById("tile");
-    const context = canvas.getContext("2d");
+    // const canvas = document.getElementById("tile");
+    // const context = canvas.getContext("2d");
 
     if (selectedTileIndex) {
 
@@ -660,35 +660,35 @@ function renderSelectedTile() {
         // apply shade
         colors = colors.map((c, i) => colors[palette.shades[shadeIndex][i]]);
 
-        const tileToCanvas = (tile, canvas) => {
+        // const tileToCanvas = (tile, canvas) => {
 
-            if (tile.length > 0) {
+        //     if (tile.length > 0) {
 
-                canvas.width = tile.length;
-                canvas.height = tile[0].length;
+        //         canvas.width = tile.length;
+        //         canvas.height = tile[0].length;
 
-                const data = context.createImageData(tile.length, tile[0].length);
+        //         const data = context.createImageData(tile.length, tile[0].length);
 
-                // iterate the Y axis first because the tiles are stored in the opposite coordinate system than the screen memory is stored
-                for (let y = 0; y < tile[0].length; y++) {
-                    for (let x = 0; x < tile.length; x++) {
-                        const index = tile[x][y];
-                        const color = colors[index];
-                        const i = x + y * tile.length;
-                        data.data[i * 4 + 0] = color[0];
-                        data.data[i * 4 + 1] = color[1];
-                        data.data[i * 4 + 2] = color[2];
-                        data.data[i * 4 + 3] = transparency ? (index === 255 ? 0 : 255) : 255;
-                    }
-                }
+        //         // iterate the Y axis first because the tiles are stored in the opposite coordinate system than the screen memory is stored
+        //         for (let y = 0; y < tile[0].length; y++) {
+        //             for (let x = 0; x < tile.length; x++) {
+        //                 const index = tile[x][y];
+        //                 const color = colors[index];
+        //                 const i = x + y * tile.length;
+        //                 data.data[i * 4 + 0] = color[0];
+        //                 data.data[i * 4 + 1] = color[1];
+        //                 data.data[i * 4 + 2] = color[2];
+        //                 data.data[i * 4 + 3] = transparency ? (index === 255 ? 0 : 255) : 255;
+        //             }
+        //         }
 
-                context.putImageData(data, 0, 0);
+        //         context.putImageData(data, 0, 0);
 
-            } else {
-                context.clearRect(0, 0, canvas.width, canvas.height);
-            }
+        //     } else {
+        //         context.clearRect(0, 0, canvas.width, canvas.height);
+        //     }
 
-        };
+        // };
 
         let tileDictionary = Globals.Arts.reduce((dictionary, art) => {
             for (let i = 0; i < art.tiles.length; i++) {
@@ -707,14 +707,16 @@ function renderSelectedTile() {
         renderAnimationParameters(animation);
 
         // render tile
-        tileToCanvas(tile.tilePixels, canvas);
+        //tileToCanvas(tile.tilePixels, canvas);
 
         // render animation // 1 = oscilating | 2 = forward | 3 = backward
-        if (animation.type > 0) {
+        //if (animation.type > 0) {
             const animationTiles = [];
             const indexDictionary = Object.keys(tileDictionary).map(v => parseInt(v));
             const orderIndexOfRoot = Object.keys(tileDictionary).findIndex(v => parseInt(v) === tile.tileIndex);
-            if (animation.type === 1 || animation.type === 2) {
+            if (animation.type === 0) { // no animation defined yet => render static tile
+                animationTiles.push(tileDictionary[indexDictionary[orderIndexOfRoot]]);
+            } else if (animation.type === 1 || animation.type === 2) {
                 for (let i = orderIndexOfRoot; i <= orderIndexOfRoot + animation.frames; i++) {
                     animationTiles.push(tileDictionary[indexDictionary[i]]);
                 }
@@ -728,17 +730,17 @@ function renderSelectedTile() {
             Globals.Animation.Transparency = transparency;
             Globals.Animation.Speed = animation.speed;
             Globals.Animation.Type = animation.type;
-        } else {
-            Globals.Animation.Frames = [];
-            Globals.Animation.Colors = null;
-            Globals.Animation.Transparency = null;
-            Globals.Animation.Speed = 15;
-            Globals.Animation.Type = 0;
-        }
+        // } else {
+        //     Globals.Animation.Frames = [];
+        //     Globals.Animation.Colors = null;
+        //     Globals.Animation.Transparency = null;
+        //     Globals.Animation.Speed = 15;
+        //     Globals.Animation.Type = 0;
+        // }
 
     } else {
         renderAnimationParameters(null);
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        //context.clearRect(0, 0, canvas.width, canvas.height);
         Globals.Animation.Frames = [];
         Globals.Animation.Colors = null;
         Globals.Animation.Transparency = null;
@@ -783,6 +785,10 @@ function renderAnimation() {
 
         let tile = (() => {
             switch (type) {
+                // static
+                case 0: {
+                    return frames[0];
+                }
                 // oscilating
                 case 1: {
                     if (Globals.Animation.Index <= 0) {
@@ -842,7 +848,8 @@ function renderAnimation() {
 }
 
 // select palette color
-function selectPaletteColorIndex(element, colorIndex) {
+function selectPaletteColorIndex(event, element, colorIndex) {
+    console.log(event);
     document.querySelectorAll("svg#palette-svg rect").forEach(e => e.dataset.selected = false);
     element.dataset.selected = true;
     Globals.SelectedPaletteColorIndex = colorIndex;
@@ -1024,7 +1031,7 @@ function editTileOrder(fromIndex, toIndex, swap) {
 // new shade
 function newShade () {
     const shadeIndex = document.querySelector("input#shade-range").value;
-    const baseShade = Globals.Palette.shades[shadeIndex];
+    const baseShade = [...Globals.Palette.shades[shadeIndex]];
     Globals.Palette.shades.push(baseShade);
     renderShadeOptions(Globals.Palette);
     document.querySelector("label#shade-label").dataset.shade = Globals.Palette.shades.length - 1;
@@ -1038,7 +1045,7 @@ function newSwap () {
         const swapIndex = document.querySelector("select#swap-select").value || null;
         const baseSwap = { 
             index: Globals.Lookup.swaps.length + 1, 
-            table: swapIndex ? Object.assign({}, Globals.Lookup.swaps[swapIndex].table) : new Array(256).fill(0).map((v, i) => i)
+            table: swapIndex ? [...Globals.Lookup.swaps[swapIndex].table] : new Array(256).fill(0).map((v, i) => i)
             //table: new Array(256).fill(255)
         };
         Globals.Lookup.swaps.push(baseSwap);

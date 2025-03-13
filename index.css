@@ -214,15 +214,13 @@ svg {
 }
 
 div#menu {
-    background-color: #101010;
-    box-shadow: 0px 0px 5px black;
-    border-radius: 10px;
     position: fixed;
     top: 16px;
     left: 16px;
     height: calc(100vh - 32px);    
     overflow-x: hidden;
-    overflow-y: scroll;    
+    overflow-y: scroll;
+    gap: 16px;
     &::-webkit-scrollbar {            
         background-color: transparent;
         height: 4px;
@@ -238,6 +236,15 @@ div#menu {
     &:hover::-webkit-scrollbar-thumb {
         background-color: #434343;
     }
+}
+
+div.box {
+    padding: 16px;
+    background-color: #101010;
+    box-shadow: 0px 0px 5px black;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
 }
 
 div#tiles {
@@ -386,4 +393,53 @@ canvas#animation {
     &[data-background="true"] {
         background-image: url(./transparency-background.png);
     }
+}
+
+/* ================================================================================ */
+/* summary + details */
+/* ================================================================================ */
+
+summary {
+    font-family: "Candara";
+    font-size: 14px;
+    font-weight: bold;
+    height: 32px;
+    line-height: 32px;
+    padding-left: 8px;
+    box-sizing: border-box;
+    border-bottom: 1px solid #2E2E2E;
+}
+
+summary:hover {
+    border-radius: 5px; 
+    background-color: #2E2E2E;
+    cursor: pointer;
+}
+
+details>div:nth-of-type(1) {
+    margin-top: 16px;
+}
+
+details[open] {
+    border-radius: 5px;
+}
+
+details>summary {
+    list-style: none;
+}
+
+summary::-webkit-details-marker {
+    display: none
+}
+
+summary::after {
+    float: right;
+    content: '►';
+    margin-right: 16px;
+}
+
+details[open] summary:after {
+    float: right;
+    content: "▼";
+    margin-right: 16px;
 }

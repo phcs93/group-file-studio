@@ -28,128 +28,194 @@
 
     <body>
 
-        <div id="menu" class="flex-rows padding-16" style="width: calc(256px + 32px);">
+        <div id="menu" class="flex-rows" style="width: calc(256px + 32px);">
 
-            <label style="font-size: 24px;">GROUP FILE STUDIO</label>
-            <label>MADE BY <a href="https://github.com/phcs93/lookup-file-editor">PHCS93</a></label>
+            <!-- grp -->
+            <div class="box">
 
-            <br>
-            <hr>
-            <br>
+                <label style="font-size: 24px;">GROUP FILE STUDIO</label>
+                <label>MADE BY <a href="https://github.com/phcs93/lookup-file-editor">PHCS93</a></label>
 
-            <label>GRP <span class="tip">(this will load all other files)</span></label>
-            <input type="file" id="grp-input" accept=".grp">
+                <br>
+                <hr>
+                <br>
 
-            <br>
-            <hr>
-            <br>
+                <label>GRP <span class="tip">(this will load all other files)</span></label>
+                <input type="file" id="grp-input" accept=".grp">
 
-            <label id="grid-size-label" data-gridsize="128">GRID SIZE</label>
-            <input type="range" id="grid-size-range" min="8" max="512" step="2" value="128">
+                <br>
+                <hr>
+                <br>
 
-            <br>
-            
-            <div>
-                <input type="checkbox" id="enable-transparency" checked>
-                <label>ENABLE TRANSPARENCY</label>
-            </div>
+                <label id="grid-size-label" data-gridsize="128">GRID SIZE</label>
+                <input type="range" id="grid-size-range" min="8" max="512" step="2" value="128">
 
-            <div>
-                <input type="checkbox" id="enable-background">
-                <label>ENABLE BACKGROUND</label>
-            </div>
-
-            <br>
-            <hr>
-            <br>
+                <br>
                 
-            <label>PALETTE <span class="tip">(overwrites current palette file)</span></label>
-            <input type="file" id="palette-input" accept=".dat">
-            <br>
-            <span class="tip">(click to select as brush)</span>
-            <span class="tip">(double click to edit color)</span>
-            <br>
-            <svg id="palette-svg"></svg>
-            <br>
-            <label id="shade-label" data-shade="0">SHADE</label>
-            <input type="range" id="shade-range" min="0" max="0" step="1">
-            <br>
-            <button onclick="newShade()">NEW SHADE BASED ON CURRENT</button>
-            <br>
-            <span class="tip">(click to set color to selected brush)</span>
-            <br>            
-            <svg id="shade-svg"></svg>
-            <br>
-            <button onclick="exportPaletteFile()">EXPORT MODIFIED PALETTE.DAT</button>
+                <div>
+                    <input type="checkbox" id="enable-transparency" checked>
+                    <label>ENABLE TRANSPARENCY</label>
+                </div>
 
-            <br>
-            <hr>
-            <br>
+                <div>
+                    <input type="checkbox" id="enable-background">
+                    <label>ENABLE BACKGROUND</label>
+                </div>
 
-            <label>LOOKUP <span class="tip">(overwrites current lookup file)</span></label>
-            <input type="file" id="lookup-input" accept=".dat">
-            <br>
-            <label>PALETTE SWAP NUMBER</label>
-            <select id="swap-select"></select>
-            <br>
-            <button onclick="newSwap()">NEW SWAP BASED ON CURRENT</button>
-            <br>
-            <span class="tip">(click to set color to selected brush)</span>
-            <br>
-            <svg id="lookup-svg"></svg>
-            <br>
-            <label>ALTERNATIVE GLOBAL PALETTE</label>
-            <select id="alternate-select"></select>
-            <br>
-            <button onclick="newAlternate()">NEW ALT BASED ON CURRENT</button>
-            <br>
-            <span class="tip">(double click to edit color)</span>
-            <br>    
-            <svg id="alternate-svg"></svg>
-            <br>
-            <button onclick="exportLookupFile()">EXPORT MODIFIED LOOKUP.DAT</button>
+            </div>
 
-            <br>
-            <hr>
-            <br>
+            <!-- palette -->
+            <div class="box">
+                
+                <label>PALETTE <span class="tip">(overwrites current palette file)</span></label>
+                <input type="file" id="palette-input" accept=".dat">
+                <br>
+                <span class="tip">(click to select as brush)</span>
+                <span class="tip">(shift + click to select range)</span>
+                <span class="tip">(double click to edit color)</span>
+                <br>
+                <svg id="palette-svg"></svg>
+                <br>
 
-            <label>ART <span class="tip">(overwrites current loaded tiles)</span></label>
-            <input type="file" id="art-input" accept=".art" multiple="true">            
-            <br>
-            <span class="tip">you can upload multiples files</span>
-            <span class="tip">current ART files will be replaced by corresponding uploaded ART file base on "localtilestart"</span>
-            <br>
-            <canvas id="tile"></canvas>
-            <br>
-            <label>ANIMATION TYPE</label>
-            <select id="animation-type">
-                <option value="0">none</option>
-                <option value="1">oscillating</option>
-                <option value="2">forward</option>
-                <option value="3">backward</option>
-            </select>
-            <br>
-            <label>NUMBER OF FRAMES</label>
-            <input type="number" id="animation-frames" value="0" step="1" min="0">
-            <br>
-            <label>OFFSET X</label>
-            <input type="number" id="animation-offset-x" value="0" step="1">
-            <br>
-            <label>OFFSET Y</label>
-            <input type="number" id="animation-offset-y" value="0" step="1">
-            <br>
-            <label>SPEED</label>
-            <input type="number" id="animation-speed" value="0" step="1" min="0" max="15">
-            <br>
-            <canvas id="animation"></canvas>
-            <br>
-            <span class="tip">animation speed preview is only an aproximation of what it will look like in the game</span>
-            <br>
-            <button onclick="exportArtFiles()">EXPORT MODIFIED ART FILES (.ZIP)</button>
-            <br>
-            <button onclick="exportTileFiles()">EXPORT TILES AS PNG (.ZIP)</button>
-            <br>
-            <span class="tip">tiles will be exported just as you see them in the grid (with or without transparency, with pallete swaps and alternative palettes, shades, etc)</span>
+                <!-- shade -->
+                <details>
+
+                    <summary>SHADE</summary>
+
+                    <div class="flex-rows">
+
+                        <label id="shade-label" data-shade="0">SHADE</label>
+                        <input type="range" id="shade-range" min="0" max="0" step="1">
+                        <br>
+                        <button onclick="newShade()">NEW SHADE BASED ON CURRENT</button>
+                        <br>
+                        <span class="tip">(click to set color to selected brush)</span>
+                        <br>            
+                        <svg id="shade-svg"></svg>
+
+                    </div>
+
+                </details>
+
+
+                <br>
+                <button onclick="exportPaletteFile()">EXPORT MODIFIED PALETTE.DAT</button>
+
+            </div>
+
+            <!-- lookup -->
+            <div class="box">
+
+                <label>LOOKUP <span class="tip">(overwrites current lookup file)</span></label>
+                <input type="file" id="lookup-input" accept=".dat">
+                <br>
+
+                <!-- swaps -->
+                <details>
+
+                    <summary>SWAPS</summary>
+
+                    <div class="flex-rows">
+
+                        <label>PALETTE SWAP NUMBER</label>
+                        <select id="swap-select"></select>
+                        <br>
+                        <button onclick="newSwap()">NEW SWAP BASED ON CURRENT</button>
+                        <br>
+                        <span class="tip">(click to set color to selected brush)</span>
+                        <br>
+                        <svg id="lookup-svg"></svg>
+
+                    </div>
+                    
+                </details>
+
+                <br>
+
+                <!-- alts -->
+                <details>
+
+                    <summary>ALTERNATIVE PALETTES</summary>
+
+                    <div class="flex-rows">
+
+                        <label>ALTERNATIVE GLOBAL PALETTE</label>
+                        <select id="alternate-select"></select>
+                        <br>
+                        <button onclick="newAlternate()">NEW ALT BASED ON CURRENT</button>
+                        <br>
+                        <span class="tip">(double click to edit color)</span>
+                        <br>    
+                        <svg id="alternate-svg"></svg>                        
+
+                    </div>
+                    
+                </details>
+
+                <br>
+                <button onclick="exportLookupFile()">EXPORT MODIFIED LOOKUP.DAT</button>
+
+            </div>
+
+            <!-- art -->
+            <div class="box">
+
+                <label>ART <span class="tip">(overwrites current loaded tiles)</span></label>
+                <input type="file" id="art-input" accept=".art" multiple="true">            
+                <br>
+                <span class="tip">you can upload multiples files</span>
+                <span class="tip">current ART files will be replaced by corresponding uploaded ART file base on "localtilestart"</span>
+                <br>
+                <!-- 
+                <canvas id="tile"></canvas>
+                <br> 
+                -->
+
+                <!-- anim -->
+                <details>
+
+                    <summary>ANIMATION</summary>
+
+                    <div class="flex-rows">
+
+                        <span class="tip">select a tile in the grid to edit its animation</span>
+                        <br>
+                        <canvas id="animation"></canvas>
+                        <br>
+                        <label>ANIMATION TYPE</label>
+                        <select id="animation-type">
+                            <option value="0">none</option>
+                            <option value="1">oscillating</option>
+                            <option value="2">forward</option>
+                            <option value="3">backward</option>
+                        </select>
+                        <br>
+                        <label>NUMBER OF FRAMES</label>
+                        <input type="number" id="animation-frames" value="0" step="1" min="0">
+                        <br>
+                        <label>OFFSET X</label>
+                        <input type="number" id="animation-offset-x" value="0" step="1">
+                        <br>
+                        <label>OFFSET Y</label>
+                        <input type="number" id="animation-offset-y" value="0" step="1">
+                        <br>
+                        <label>SPEED</label>
+                        <input type="number" id="animation-speed" value="0" step="1" min="0" max="15">
+                        <br>
+                        <span class="tip">animation speed preview is only an aproximation of what it will look like in the game</span>
+                
+                    </div>
+                    
+                </details>
+                
+                <br>
+                <button onclick="exportArtFiles()">EXPORT MODIFIED ART FILES (.ZIP)</button>
+                <br>
+                <button onclick="exportTileFiles()">EXPORT TILES AS PNG (.ZIP)</button>
+                <br>
+                <span class="tip">tiles will be exported just as you see them in the grid (with or without transparency, with pallete swaps and alternative palettes, shades, etc)</span>
+
+            </div>
 
         </div>
 
