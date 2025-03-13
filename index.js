@@ -516,7 +516,7 @@ function renderAlternate(palette, lookup, alternateIndex) {
                 const index = x + y * size;
                 const color = colors[index];
                 const rect = `<rect 
-                    ondblclick="editAlternateTable(${alternateIndex}, ${index})" 
+                    ondblclick="editAlternateTable(${alternateIndex}, ${index}, event)" 
                     x="${x * 16}" 
                     y="${y * 16}" 
                     width="16px" 
@@ -911,7 +911,7 @@ function editPaletteTable(colorIndex, event) {
 }
 
 // edit alternate table
-function editAlternateTable(alternateIndex, colorIndex) {
+function editAlternateTable(alternateIndex, colorIndex, event) {
 
     if (alternateIndex !== null) {
 
