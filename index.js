@@ -950,7 +950,7 @@ function editAlternateTable(alternateIndex, colorIndex, event) {
 
 // edit shade table
 function editShadeTable(shadeIndex, colorIndex) {
-    if (Globals.SelectedPaletteColorStartIndex) {
+    if (Globals.SelectedPaletteColorStartIndex !== null) {
         const end = Globals.SelectedPaletteColorEndIndex ?? Globals.SelectedPaletteColorStartIndex;
         let c = 0;
         for (let i = Globals.SelectedPaletteColorStartIndex; i <= end; i++) {
@@ -964,7 +964,7 @@ function editShadeTable(shadeIndex, colorIndex) {
 
 // edit lookup table
 function editLookupTable(swapIndex, colorIndex) {
-    if (Globals.SelectedPaletteColorStartIndex && swapIndex !== null) {
+    if (Globals.SelectedPaletteColorStartIndex !== null && swapIndex !== null) {
         const end = Globals.SelectedPaletteColorEndIndex ?? Globals.SelectedPaletteColorStartIndex;
         let c = 0;
         for (let i = Globals.SelectedPaletteColorStartIndex; i <= end; i++) {
