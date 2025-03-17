@@ -989,13 +989,20 @@ function editTile(artIndex, tileIndex, pixels) {
                 Math.pow(color[0] - c[0], 2) +
                 Math.pow(color[1] - c[1], 2) +
                 Math.pow(color[2] - c[2], 2)
-            );
-            // using less or equal ensures that the last index has priority
-            // so transparency will always be prioritized
-            if (distance <= minDistance) {
+            );            
+            if (distance < minDistance) {
                 minDistance = distance;
                 closestColorIndex = index;
             }
+        }
+        // if closest color is the same as used by the last index => use last index instead
+        // this is done to prioritize transparency over any other color
+        if (
+            colors[closestColorIndex][0] === colors[255][0] &&
+            colors[closestColorIndex][1] === colors[255][1] &&
+            colors[closestColorIndex][2] === colors[255][2]
+        ) {
+            closestColorIndex = 255;
         }
         return closestColorIndex;
     };
