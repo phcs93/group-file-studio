@@ -549,7 +549,7 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
     }
 
     // apply shade
-    colors = colors.map((c, i) => colors[palette.shades[shadeIndex][i]]);
+    colors = colors.map((c, i) => colors[palette.shades[shadeIndex][swapIndex !== null ? lookup.swaps[swapIndex].table[i] : i]]);
 
     const startTime = new Date(); // for calculating performance
 
@@ -606,7 +606,7 @@ function renderArts(palette, shadeIndex, lookup, swapIndex, alternateIndex, arts
 
                 // iterate the Y axis first because the tiles are stored in the opposite coordinate system than the screen memory is stored
                 for (let y = 0; y < tile[0].length; y++) {
-                    for (let x = 0; x < tile.length; x++) {
+                    for (let x = 0; x < tile.length; x++) {                        
                         const index = tile[x][y];
                         const color = colors[index];
                         const i = x + y * tile.length;
@@ -1017,8 +1017,8 @@ function editTile(artIndex, tileIndex, pixels) {
     }
 
     // update tilesizx and tilesizy
-    Globals.Arts[artIndex].tilesizx[localTileIndex] = pixels.length;
-    Globals.Arts[artIndex].tilesizy[localTileIndex] = pixels[0].length;
+    Globals.Arts[artIndex].tilesizx[localTileIndex] = pixels[0].length;
+    Globals.Arts[artIndex].tilesizy[localTileIndex] = pixels.length;
 
     render();
 
